@@ -1,0 +1,44 @@
+{
+  "name": "football-lineup-generator",
+  "version": "1.0.0",
+  "description": "A TypeScript library for generating visual football lineup diagrams from team positioning data",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "npm run build && concurrently \"npm run watch\" \"npm run serve\"",
+    "watch": "tsc --watch",
+    "serve": "http-server . -p 3000 -o example.html --cors",
+    "start": "npm run dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "football",
+    "soccer",
+    "lineup",
+    "visualization",
+    "canvas",
+    "sports"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "http-server": "^14.1.1",
+    "concurrently": "^8.2.2"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/football-lineup-generator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/football-lineup-generator/issues"
+  },
+  "homepage": "https://github.com/your-username/football-lineup-generator#readme"
+} 

@@ -1,0 +1,1 @@
+export declare function drawTeamLabelRotated90CCW(ctx: CanvasRenderingContext2D, teamName: string, isHomeTeam: boolean, width: number, height: number, homeTeamColor: string, awayTeamColor: string, fontSize: number, offsetX?: number): void;
