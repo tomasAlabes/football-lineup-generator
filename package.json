@@ -1,6 +1,6 @@
 {
   "name": "football-lineup-generator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A TypeScript library for generating visual football lineup diagrams from team positioning data",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
