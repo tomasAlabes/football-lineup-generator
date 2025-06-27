@@ -35,10 +35,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/football-lineup-generator.git"
+    "url": "https://github.com/ncamaa/football-lineup-generator.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/football-lineup-generator/issues"
+    "url": "https://github.com/ncamaa/football-lineup-generator/issues"
   },
-  "homepage": "https://github.com/your-username/football-lineup-generator#readme"
+  "homepage": "https://github.com/ncamaa/football-lineup-generator#readme"
 } 

@@ -83,6 +83,7 @@ export function generateLineupFromPositioning(
 
 // Export types and enums for external use
 export { Team, Position, LayoutType };
+export { FootballLineupRenderer };
 export type { LineupData, LineupConfig, Player, PlayerPositioning };
 
 // Export default
@@ -92,4 +93,5 @@ export default {
   Team,
   Position,
   LayoutType,
+  FootballLineupRenderer,
 }; 

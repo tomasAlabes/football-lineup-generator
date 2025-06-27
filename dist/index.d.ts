@@ -1,3 +1,4 @@
+import { FootballLineupRenderer } from './renderer.js';
 import type { LineupData, LineupConfig, Player, PlayerPositioning } from './types.js';
 import { Team, Position, LayoutType } from './types.js';
 /**
@@ -24,6 +25,7 @@ export declare function generateLineupFromPositioning(positioningData: Array<{
     position: Position;
 }>, homeTeamName: string, awayTeamName: string, config?: LineupConfig): HTMLCanvasElement;
 export { Team, Position, LayoutType };
+export { FootballLineupRenderer };
 export type { LineupData, LineupConfig, Player, PlayerPositioning };
 declare const _default: {
     generateLineup: typeof generateLineup;
@@ -31,5 +33,6 @@ declare const _default: {
     Team: typeof Team;
     Position: typeof Position;
     LayoutType: typeof LayoutType;
+    FootballLineupRenderer: typeof FootballLineupRenderer;
 };
 export default _default;

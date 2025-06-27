@@ -12,10 +12,77 @@ A TypeScript library for generating visual football (soccer) lineup diagrams fro
 - ⚡ Lightweight with no external dependencies
 - 🏆 Support for substitutes and bench players
 
+## Screenshots
+
+| Full Pitch | Half Pitch | Split Pitch |
+|:----------:|:----------:|:-----------:|
+| ![Full Pitch](./screenshots/full-pitch.png) | ![Half Pitch](./screenshots/half-pitch.png) | ![Split Pitch](./screenshots/split-pitch.png) |
+
+## Development
+
+### Getting Started
+
+1. **Install dependencies:**
+
+   ```bash
+   npm install
+   ```
+2. **Start development environment:**
+
+   ```bash
+   	npm run dev
+   ```
+
+   This will:
+
+   - Compile TypeScript in watch mode (auto-recompiles on file changes)
+   - Start an HTTP server on `http://localhost:3000`
+   - Automatically open `example.html` in your browser
+   - Enable CORS for local development
+3. **Alternative commands:**
+
+   ```bash
+   npm start          # Same as npm run dev
+   npm run build      # One-time TypeScript compilation
+   npm run watch      # TypeScript watch mode only
+   npm run serve      # HTTP server only
+   ```
+
+### Development Workflow
+
+- Make changes to TypeScript files in the `src/` directory
+- Changes are automatically compiled and reflected in the browser
+- Open `http://localhost:3000` to see the example page
+- The example page loads the compiled library from `dist/index.js`
+
+### Project Structure
+
+```
+src/
+├── functions/          # Core rendering functions
+├── index.ts           # Main library entry point
+├── renderer.ts        # Football lineup renderer class
+└── types.ts          # TypeScript type definitions
+```
+
 ## Installation
 
 ```bash
 npm install football-lineup-generator
+```
+
+## Usage
+
+### TypeScript/ESM
+
+```typescript
+import { generateLineup, FootballLineupRenderer, Team, Position, LayoutType } from 'football-lineup-generator';
+```
+
+### CommonJS
+
+```js
+const { generateLineup, FootballLineupRenderer, Team, Position, LayoutType } = require('football-lineup-generator');
 ```
 
 ## Quick Start
@@ -71,6 +138,7 @@ document.body.appendChild(canvas);
 Creates a canvas element with a football lineup visualization.
 
 **Parameters:**
+
 - `lineupData` (LineupData): The lineup data containing both teams' player positions
 - `config` (LineupConfig, optional): Configuration options for the visualization
 
@@ -81,9 +149,10 @@ Creates a canvas element with a football lineup visualization.
 Convenience function to create a lineup from backend positioning data format.
 
 **Parameters:**
+
 - `positioningData` (Array): Array of positioning data from backend
 - `homeTeamName` (string): Name of the home team
-- `awayTeamName` (string): Name of the away team  
+- `awayTeamName` (string): Name of the away team
 - `config` (LineupConfig, optional): Configuration options
 
 **Returns:** `HTMLCanvasElement`
@@ -120,6 +189,7 @@ enum LayoutType {
 ## Team and Position Enums
 
 ### Team
+
 ```typescript
 enum Team {
   RED = "red",
@@ -128,6 +198,7 @@ enum Team {
 ```
 
 ### Position
+
 ```typescript
 enum Position {
   GOALKEEPER = "goalkeeper",
@@ -151,6 +222,7 @@ enum Position {
 ## Layout Options Examples
 
 ### Full Pitch Layout (Default)
+
 Both teams positioned across the entire field with traditional mirrored positioning.
 
 ```typescript
@@ -160,6 +232,7 @@ const canvas = await generateLineup(lineupData, {
 ```
 
 ### Half Pitch Layout
+
 Each team positioned only in their respective half for clearer visualization.
 
 ```typescript
@@ -169,6 +242,7 @@ const canvas = await generateLineup(lineupData, {
 ```
 
 ### Split Pitch Layout
+
 Two separate parallel pitches side by side, each showing one team's formation.
 
 ```typescript
@@ -210,18 +284,18 @@ const lineupData = {
     players: [
       // Goalkeeper
       { player: { id: 1, name: "Ederson", jerseyNumber: 31 }, team: Team.RED, position: Position.GOALKEEPER },
-      
+    
       // Defense
       { player: { id: 2, name: "Walker", jerseyNumber: 2 }, team: Team.RED, position: Position.RIGHT_BACK },
       { player: { id: 3, name: "Dias", jerseyNumber: 3 }, team: Team.RED, position: Position.CENTER_BACK },
       { player: { id: 4, name: "Stones", jerseyNumber: 5 }, team: Team.RED, position: Position.CENTER_BACK },
       { player: { id: 5, name: "Cancelo", jerseyNumber: 27 }, team: Team.RED, position: Position.LEFT_BACK },
-      
+    
       // Midfield
       { player: { id: 6, name: "Rodri", jerseyNumber: 16 }, team: Team.RED, position: Position.DEFENSIVE_MIDFIELDER },
       { player: { id: 7, name: "De Bruyne", jerseyNumber: 17 }, team: Team.RED, position: Position.CENTER_MIDFIELDER },
       { player: { id: 8, name: "Silva", jerseyNumber: 20 }, team: Team.RED, position: Position.CENTER_MIDFIELDER },
-      
+    
       // Forward
       { player: { id: 9, name: "Mahrez", jerseyNumber: 26 }, team: Team.RED, position: Position.RIGHT_WINGER },
       { player: { id: 10, name: "Haaland", jerseyNumber: 9 }, team: Team.RED, position: Position.CENTER_FORWARD },
@@ -283,6 +357,7 @@ const canvas = generateLineupFromPositioning(
 ## Browser Compatibility
 
 This library works in all modern browsers that support HTML5 Canvas:
+
 - Chrome 4+
 - Firefox 2+
 - Safari 3.1+
@@ -300,8 +375,9 @@ MIT License - see LICENSE file for details.
 ## Changelog
 
 ### 1.0.0
+
 - Initial release
 - Basic lineup generation
 - Canvas-based rendering
 - TypeScript support
-- Customizable styling 
+- Customizable styling

@@ -60,6 +60,7 @@ export function generateLineupFromPositioning(positioningData, homeTeamName, awa
 }
 // Export types and enums for external use
 export { Team, Position, LayoutType };
+export { FootballLineupRenderer };
 // Export default
 export default {
     generateLineup,
@@ -67,4 +68,5 @@ export default {
     Team,
     Position,
     LayoutType,
+    FootballLineupRenderer,
 };
