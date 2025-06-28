@@ -1,6 +1,17 @@
 # Football Lineup Generator
 
+[![npm version](https://badge.fury.io/js/football-lineup-generator.svg)](https://badge.fury.io/js/football-lineup-generator)
+[![npm downloads](https://img.shields.io/npm/dm/football-lineup-generator.svg)](https://www.npmjs.com/package/football-lineup-generator)
+[![GitHub stars](https://img.shields.io/github/stars/ncamaa/football-lineup-generator.svg)](https://github.com/ncamaa/football-lineup-generator/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/ncamaa/football-lineup-generator.svg)](https://github.com/ncamaa/football-lineup-generator/network)
+[![GitHub issues](https://img.shields.io/github/issues/ncamaa/football-lineup-generator.svg)](https://github.com/ncamaa/football-lineup-generator/issues)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A TypeScript library for generating visual football (soccer) lineup diagrams from team positioning data. Create beautiful, interactive lineup visualizations that can be easily embedded in web applications.
+
+## Live Demo
+
+🚀 **[Try the live demo here](https://ncamaa.github.io/football-lineup-generator/)**
 
 ## Features
 
