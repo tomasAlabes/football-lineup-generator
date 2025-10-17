@@ -6,6 +6,7 @@ import { calculatePlayerCoordinates } from './calculatePlayerCoordinates.js';
 import { calculateLabelPositions } from './calculateLabelPositions.js';
 import { drawPlayer } from './drawPlayer.js';
 import { mirrorCoordinatesForAwayTeam } from './mirrorCoordinates.js';
+import { drawSubstitutesList } from './drawSubstitutesList.js';
 
 
 export function renderFullPitch(
@@ -120,5 +121,17 @@ export function renderFullPitch(
         playerWithLabel.shouldPlaceLabelAbove
       );
     }
+  }
+
+  // Draw substitutes list if enabled
+  if (config.showSubstitutes) {
+    drawSubstitutesList(
+      ctx,
+      lineupData,
+      config.height,
+      config.homeTeamColor,
+      config.awayTeamColor,
+      config.fontSize
+    );
   }
 } 

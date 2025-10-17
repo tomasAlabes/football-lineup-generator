@@ -5,6 +5,7 @@ import { calculatePlayerCoordinates } from './calculatePlayerCoordinates.js';
 import { calculateLabelPositions } from './calculateLabelPositions.js';
 import { drawPlayer } from './drawPlayer.js';
 import { mirrorCoordinatesForAwayTeam } from './mirrorCoordinates.js';
+import { drawSubstitutesList } from './drawSubstitutesList.js';
 export function renderFullPitch(ctx, lineupData, config) {
     // Draw field
     drawField(ctx, config.width, config.height, config.fieldColor, config.lineColor);
@@ -42,5 +43,9 @@ export function renderFullPitch(ctx, lineupData, config) {
         if (isAwayPlayer) {
             drawPlayer(ctx, playerWithLabel.player, playerWithLabel.coordinates, false, config.homeTeamColor, config.awayTeamColor, config.playerCircleSize, config.showJerseyNumbers, config.showPlayerNames, config.fontSize, allPlayersWithCoords, playerWithLabel.shouldPlaceLabelAbove);
         }
+    }
+    // Draw substitutes list if enabled
+    if (config.showSubstitutes) {
+        drawSubstitutesList(ctx, lineupData, config.height, config.homeTeamColor, config.awayTeamColor, config.fontSize);
     }
 }

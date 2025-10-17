@@ -59,6 +59,7 @@ export interface LineupConfig {
   layoutType?: LayoutType;
   showPlayerNames?: boolean;
   showJerseyNumbers?: boolean;
+  showSubstitutes?: boolean;
   fieldColor?: string;
   lineColor?: string;
   homeTeamColor?: string;

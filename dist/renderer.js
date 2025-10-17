@@ -18,6 +18,7 @@ export class FootballLineupRenderer {
             layoutType: config.layoutType ?? LayoutType.FULL_PITCH,
             showPlayerNames: config.showPlayerNames ?? true,
             showJerseyNumbers: config.showJerseyNumbers ?? true,
+            showSubstitutes: config.showSubstitutes ?? false,
             fieldColor: config.fieldColor ?? '#4CAF50',
             lineColor: config.lineColor ?? '#FFFFFF',
             homeTeamColor: config.homeTeamColor ?? '#FF5722',
@@ -34,6 +35,10 @@ export class FootballLineupRenderer {
         else {
             this.canvas.width = this.config.width;
             this.canvas.height = this.config.height;
+            // Add extra height for substitutes if enabled
+            if (this.config.showSubstitutes) {
+                this.canvas.height += 120; // Add space for substitute lists (60px per team)
+            }
         }
     }
     render(lineupData) {
