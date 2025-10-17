@@ -27,3 +27,9 @@ export var LayoutType;
     LayoutType["HALF_PITCH"] = "half_pitch";
     LayoutType["SPLIT_PITCH"] = "split_pitch";
 })(LayoutType || (LayoutType = {}));
+export var SubstitutesPosition;
+(function (SubstitutesPosition) {
+    SubstitutesPosition["LEFT"] = "left";
+    SubstitutesPosition["BOTTOM"] = "bottom";
+    SubstitutesPosition["RIGHT"] = "right";
+})(SubstitutesPosition || (SubstitutesPosition = {}));

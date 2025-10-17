@@ -24,6 +24,11 @@ export declare enum LayoutType {
     HALF_PITCH = "half_pitch",// Each team stays in their half
     SPLIT_PITCH = "split_pitch"
 }
+export declare enum SubstitutesPosition {
+    LEFT = "left",
+    BOTTOM = "bottom",
+    RIGHT = "right"
+}
 export interface Player {
     id: number;
     name: string;
@@ -47,13 +52,17 @@ export interface LineupData {
         players: PlayerPositioning[];
     };
 }
+export interface SubstitutesConfig {
+    enabled: boolean;
+    position: SubstitutesPosition;
+}
 export interface LineupConfig {
     width?: number;
     height?: number;
     layoutType?: LayoutType;
     showPlayerNames?: boolean;
     showJerseyNumbers?: boolean;
-    showSubstitutes?: boolean;
+    showSubstitutes?: boolean | SubstitutesConfig;
     fieldColor?: string;
     lineColor?: string;
     homeTeamColor?: string;

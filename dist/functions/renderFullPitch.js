@@ -45,7 +45,7 @@ export function renderFullPitch(ctx, lineupData, config) {
         }
     }
     // Draw substitutes list if enabled
-    if (config.showSubstitutes) {
-        drawSubstitutesList(ctx, lineupData, config.height, config.homeTeamColor, config.awayTeamColor, config.fontSize);
+    if (config.showSubstitutes.enabled) {
+        drawSubstitutesList(ctx, lineupData, config.width, config.height, config.homeTeamColor, config.awayTeamColor, config.fontSize, config.showSubstitutes.position);
     }
 }

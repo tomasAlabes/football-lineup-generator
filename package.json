@@ -1,6 +1,6 @@
 {
   "name": "@talabes/football-lineup-generator",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "A TypeScript library for generating visual football lineup diagrams from team positioning data. Fork of ncamaa/football-lineup-generator with bug fixes and improvements.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,10 +23,10 @@
   "author": "Tomas Alabes",
   "license": "MIT",
   "devDependencies": {
-    "typescript": "^5.0.0",
     "@types/node": "^20.0.0",
+    "concurrently": "^8.2.2",
     "http-server": "^14.1.1",
-    "concurrently": "^8.2.2"
+    "typescript": "^5.0.0"
   },
   "files": [
     "dist/",
@@ -41,4 +41,4 @@
     "url": "https://github.com/tomasAlabes/football-lineup-generator/issues"
   },
   "homepage": "https://github.com/tomasAlabes/football-lineup-generator"
-} 
+}

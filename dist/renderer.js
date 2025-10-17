@@ -1,4 +1,4 @@
-import { LayoutType } from './types.js';
+import { LayoutType, SubstitutesPosition } from './types.js';
 // Import all the extracted functions
 import { renderFullPitch } from './functions/renderFullPitch.js';
 import { renderHalfPitch } from './functions/renderHalfPitch.js';
@@ -11,6 +11,23 @@ export class FootballLineupRenderer {
             throw new Error('Could not get 2D context from canvas');
         }
         this.ctx = context;
+        // Normalize showSubstitutes config
+        let substitutesConfig;
+        if (typeof config.showSubstitutes === 'boolean') {
+            substitutesConfig = {
+                enabled: config.showSubstitutes,
+                position: SubstitutesPosition.BOTTOM,
+            };
+        }
+        else if (config.showSubstitutes) {
+            substitutesConfig = config.showSubstitutes;
+        }
+        else {
+            substitutesConfig = {
+                enabled: false,
+                position: SubstitutesPosition.BOTTOM,
+            };
+        }
         // Default configuration with smaller player circles
         this.config = {
             width: config.width ?? 800,
@@ -18,7 +35,7 @@ export class FootballLineupRenderer {
             layoutType: config.layoutType ?? LayoutType.FULL_PITCH,
             showPlayerNames: config.showPlayerNames ?? true,
             showJerseyNumbers: config.showJerseyNumbers ?? true,
-            showSubstitutes: config.showSubstitutes ?? false,
+            showSubstitutes: substitutesConfig,
             fieldColor: config.fieldColor ?? '#4CAF50',
             lineColor: config.lineColor ?? '#FFFFFF',
             homeTeamColor: config.homeTeamColor ?? '#FF5722',
@@ -35,9 +52,19 @@ export class FootballLineupRenderer {
         else {
             this.canvas.width = this.config.width;
             this.canvas.height = this.config.height;
-            // Add extra height for substitutes if enabled
-            if (this.config.showSubstitutes) {
-                this.canvas.height += 120; // Add space for substitute lists (60px per team)
+            // Add extra space for substitutes if enabled
+            if (this.config.showSubstitutes.enabled) {
+                if (this.config.showSubstitutes.position === SubstitutesPosition.BOTTOM) {
+                    this.canvas.height += 120; // Add space for substitute lists (60px per team)
+                }
+                else if (this.config.showSubstitutes.position === SubstitutesPosition.LEFT) {
+                    this.canvas.width += 180; // Add space on the left
+                    // Shift the entire canvas context to the right to make room for left substitutes
+                    this.ctx.translate(180, 0);
+                }
+                else if (this.config.showSubstitutes.position === SubstitutesPosition.RIGHT) {
+                    this.canvas.width += 180; // Add space on the right
+                }
             }
         }
     }

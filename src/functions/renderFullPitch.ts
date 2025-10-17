@@ -1,4 +1,4 @@
-import type { LineupData, LineupConfig } from '../types.js';
+import type { LineupData, LineupConfig, SubstitutesConfig } from '../types.js';
 import { Position } from '../types.js';
 import { drawField } from './drawField.js';
 import { drawTeamLabel } from './drawTeamLabel.js';
@@ -12,7 +12,7 @@ import { drawSubstitutesList } from './drawSubstitutesList.js';
 export function renderFullPitch(
   ctx: CanvasRenderingContext2D,
   lineupData: LineupData,
-  config: Required<LineupConfig>
+  config: Required<Omit<LineupConfig, 'showSubstitutes'>> & { showSubstitutes: SubstitutesConfig }
 ): void {
   // Draw field
   drawField(
@@ -124,14 +124,16 @@ export function renderFullPitch(
   }
 
   // Draw substitutes list if enabled
-  if (config.showSubstitutes) {
+  if (config.showSubstitutes.enabled) {
     drawSubstitutesList(
       ctx,
       lineupData,
+      config.width,
       config.height,
       config.homeTeamColor,
       config.awayTeamColor,
-      config.fontSize
+      config.fontSize,
+      config.showSubstitutes.position
     );
   }
 } 

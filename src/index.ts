@@ -1,6 +1,6 @@
 import { FootballLineupRenderer } from './renderer.js';
-import type { LineupData, LineupConfig, Player, PlayerPositioning } from './types.js';
-import { Team, Position, LayoutType } from './types.js';
+import type { LineupData, LineupConfig, Player, PlayerPositioning, SubstitutesConfig } from './types.js';
+import { Team, Position, LayoutType, SubstitutesPosition } from './types.js';
 
 // Football Lineup Generator - Main entry point for creating lineup visualizations
 
@@ -82,9 +82,9 @@ export function generateLineupFromPositioning(
 }
 
 // Export types and enums for external use
-export { Team, Position, LayoutType };
+export { Team, Position, LayoutType, SubstitutesPosition };
 export { FootballLineupRenderer };
-export type { LineupData, LineupConfig, Player, PlayerPositioning };
+export type { LineupData, LineupConfig, Player, PlayerPositioning, SubstitutesConfig };
 
 // Export default
 export default {
@@ -93,5 +93,6 @@ export default {
   Team,
   Position,
   LayoutType,
+  SubstitutesPosition,
   FootballLineupRenderer,
 }; 
