@@ -1,4 +1,4 @@
-import type { LineupData, LineupConfig } from '../types.js';
+import type { LineupData, LineupConfig, SubstitutesConfig } from '../types.js';
 import { Position } from '../types.js';
 import { drawFieldRotated90CCW } from './drawFieldRotated.js';
 import { drawTeamLabelRotated90CCW } from './drawTeamLabelRotated.js';
@@ -6,12 +6,13 @@ import { calculatePlayerCoordinates } from './calculatePlayerCoordinates.js';
 import { calculateLabelPositions } from './calculateLabelPositions.js';
 import { rotatePlayerCoordinates90CCW } from './rotateCoordinates.js';
 import { drawPlayer } from './drawPlayer.js';
+import { drawSubstitutesSplit } from './drawSubstitutesSplit.js';
 
 
 export function renderSplitPitch(
   ctx: CanvasRenderingContext2D,
   lineupData: LineupData,
-  config: Required<LineupConfig>
+  config: Required<Omit<LineupConfig, 'showSubstitutes'>> & { showSubstitutes: SubstitutesConfig }
 ): void {
   const gap = 60; // Gap between the two separate fields
 
@@ -139,6 +140,22 @@ export function renderSplitPitch(
       config.fontSize,
       awayPlayerCoords,
       playerWithLabel.shouldPlaceLabelAbove
+    );
+  }
+
+  // Draw substitutes if enabled
+  if (config.showSubstitutes.enabled) {
+    drawSubstitutesSplit(
+      ctx,
+      lineupData,
+      config.height,
+      config.height + gap,
+      config.homeTeamColor,
+      config.awayTeamColor,
+      config.playerCircleSize,
+      config.showJerseyNumbers,
+      config.showPlayerNames,
+      config.fontSize
     );
   }
 } 

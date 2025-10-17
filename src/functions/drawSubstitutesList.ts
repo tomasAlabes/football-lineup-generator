@@ -12,7 +12,7 @@ export function drawSubstitutesList(
   position: SubstitutesPosition
 ): void {
   const circleRadius = 15;
-  const spacing = 15; // Space between circle and text
+  const spacing = 12; // Space between circle and text
 
   // Get substitutes
   const homeSubs = lineupData.homeTeam.players.filter(p => p.position === Position.SUBSTITUTE);
