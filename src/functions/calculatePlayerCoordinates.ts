@@ -89,21 +89,21 @@ function getFullPitchBaseCoords(
   const fieldMargin = 50;
   const fieldWidth = actualWidth - 2 * fieldMargin;
 
-  const baseCoords: Record<Position, FieldCoordinates> = {
+  const baseCoords = {
     [Position.GOALKEEPER]: { x: fieldMargin + fieldWidth * 0.08, y: height / 2 },
-    [Position.LEFT_BACK]: { x: fieldMargin + fieldWidth * 0.25, y: height * 0.2 },
+    [Position.LEFT_BACK]: { x: fieldMargin + fieldWidth * 0.27, y: height * 0.2 },
     [Position.CENTER_BACK]: { x: fieldMargin + fieldWidth * 0.25, y: height * 0.5 },
-    [Position.RIGHT_BACK]: { x: fieldMargin + fieldWidth * 0.25, y: height * 0.8 },
-    [Position.DEFENSIVE_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.4, y: height / 2 },
-    [Position.LEFT_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.55, y: height * 0.25 },
+    [Position.RIGHT_BACK]: { x: fieldMargin + fieldWidth * 0.27, y: height * 0.8 },
+    [Position.DEFENSIVE_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.45, y: height / 2 },
+    [Position.LEFT_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.6, y: height * 0.2 },
     [Position.CENTER_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.55, y: height / 2 },
-    [Position.RIGHT_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.55, y: height * 0.75 },
-    [Position.ATTACKING_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.7, y: height / 2 },
+    [Position.RIGHT_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.6, y: height * 0.8 },
+    [Position.ATTACKING_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.67, y: height / 2 },
     [Position.LEFT_WINGER]: { x: fieldMargin + fieldWidth * 0.75, y: height * 0.2 },
     [Position.RIGHT_WINGER]: { x: fieldMargin + fieldWidth * 0.75, y: height * 0.8 },
     [Position.LEFT_FORWARD]: { x: fieldMargin + fieldWidth * 0.88, y: height * 0.35 },
-    [Position.CENTER_FORWARD]: { x: fieldMargin + fieldWidth * 0.88, y: height / 2 },
-    [Position.RIGHT_FORWARD]: { x: fieldMargin + fieldWidth * 0.88, y: height * 0.65 },
+    [Position.CENTER_FORWARD]: { x: fieldMargin + fieldWidth * 0.85, y: height / 2 },
+    [Position.RIGHT_FORWARD]: { x: fieldMargin + fieldWidth * 0.85, y: height * 0.65 },
     [Position.SUBSTITUTE]: { x: actualWidth + 20, y: height / 2 },
   };
 
@@ -180,9 +180,9 @@ function calculatePositionOffset(
   if (totalPlayers === 3) {
     // For 3 players, create a wider triangle formation
     const triangleOffsets = [
-      { x: 0, y: -offsetDistance/1.5 },           // Center front
-      { x: -offsetDistance/1.2, y: offsetDistance/1.5 }, // Left back  
-      { x: offsetDistance/1.2, y: offsetDistance/1.5 }   // Right back
+      { x: 0, y: 0 },           // Left vertex (original position)
+      { x: offsetDistance / 3, y: -offsetDistance * 2 }, // Right top vertex
+      { x: offsetDistance / 3, y: offsetDistance * 2 }   // Right bottom vertex
     ];
     
     return {
