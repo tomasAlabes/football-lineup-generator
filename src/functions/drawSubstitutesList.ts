@@ -11,7 +11,7 @@ export function drawSubstitutesList(
   fontSize: number,
   position: SubstitutesPosition
 ): void {
-  const circleRadius = 12;
+  const circleRadius = 15;
   const spacing = 15; // Space between circle and text
 
   // Get substitutes
@@ -46,7 +46,6 @@ function drawSubstitutesBottom(
     ctx.fillStyle = '#333333';
     ctx.font = `bold ${fontSize}px Arial`;
     ctx.textAlign = 'left';
-    ctx.fillText('Home Substitutes:', 20, startY);
 
     let currentX = 20;
     for (let i = 0; i < homeSubs.length; i++) {
@@ -63,7 +62,6 @@ function drawSubstitutesBottom(
     ctx.fillStyle = '#333333';
     ctx.font = `bold ${fontSize}px Arial`;
     ctx.textAlign = 'left';
-    ctx.fillText('Away Substitutes:', 20, awayStartY);
 
     let currentX = 20;
     for (let i = 0; i < awaySubs.length; i++) {
@@ -94,7 +92,6 @@ function drawSubstitutesLeft(
     ctx.fillStyle = '#333333';
     ctx.font = `bold ${fontSize}px Arial`;
     ctx.textAlign = 'left';
-    ctx.fillText('Home', startX, currentY);
     currentY += 20;
 
     for (let i = 0; i < homeSubs.length; i++) {
@@ -110,7 +107,6 @@ function drawSubstitutesLeft(
     ctx.fillStyle = '#333333';
     ctx.font = `bold ${fontSize}px Arial`;
     ctx.textAlign = 'left';
-    ctx.fillText('Away', startX, currentY);
     currentY += 20;
 
     for (let i = 0; i < awaySubs.length; i++) {
@@ -141,7 +137,6 @@ function drawSubstitutesRight(
     ctx.fillStyle = '#333333';
     ctx.font = `bold ${fontSize}px Arial`;
     ctx.textAlign = 'left';
-    ctx.fillText('Home', startX, currentY);
     currentY += 20;
 
     for (let i = 0; i < homeSubs.length; i++) {
@@ -157,7 +152,6 @@ function drawSubstitutesRight(
     ctx.fillStyle = '#333333';
     ctx.font = `bold ${fontSize}px Arial`;
     ctx.textAlign = 'left';
-    ctx.fillText('Away', startX, currentY);
     currentY += 20;
 
     for (let i = 0; i < awaySubs.length; i++) {
