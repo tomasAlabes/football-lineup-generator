@@ -5,6 +5,7 @@ import { calculatePlayerCoordinates } from './calculatePlayerCoordinates.js';
 import { calculateLabelPositions } from './calculateLabelPositions.js';
 import { rotatePlayerCoordinates90CCW } from './rotateCoordinates.js';
 import { drawPlayer } from './drawPlayer.js';
+import { drawSubstitutesSplit } from './drawSubstitutesSplit.js';
 export function renderSplitPitch(ctx, lineupData, config) {
     const gap = 60; // Gap between the two separate fields
     // Draw FIRST ROTATED FIELD for home team (left side)
@@ -39,5 +40,9 @@ export function renderSplitPitch(ctx, lineupData, config) {
     // Draw away team players on SECOND rotated field (right side)
     for (const playerWithLabel of awayPlayersWithLabelPositions) {
         drawPlayer(ctx, playerWithLabel.player, playerWithLabel.coordinates, false, config.homeTeamColor, config.awayTeamColor, config.playerCircleSize, config.showJerseyNumbers, config.showPlayerNames, config.fontSize, awayPlayerCoords, playerWithLabel.shouldPlaceLabelAbove);
+    }
+    // Draw substitutes if enabled
+    if (config.showSubstitutes.enabled) {
+        drawSubstitutesSplit(ctx, lineupData, config.height, config.height + gap, config.homeTeamColor, config.awayTeamColor, config.playerCircleSize, config.showJerseyNumbers, config.showPlayerNames, config.fontSize);
     }
 }

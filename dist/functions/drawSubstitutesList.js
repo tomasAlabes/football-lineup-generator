@@ -1,7 +1,7 @@
 import { Position, SubstitutesPosition } from '../types.js';
 export function drawSubstitutesList(ctx, lineupData, width, height, homeTeamColor, awayTeamColor, fontSize, position) {
-    const circleRadius = 12;
-    const spacing = 15; // Space between circle and text
+    const circleRadius = 15;
+    const spacing = 12; // Space between circle and text
     // Get substitutes
     const homeSubs = lineupData.homeTeam.players.filter(p => p.position === Position.SUBSTITUTE);
     const awaySubs = lineupData.awayTeam.players.filter(p => p.position === Position.SUBSTITUTE);
@@ -23,7 +23,6 @@ function drawSubstitutesBottom(ctx, homeSubs, awaySubs, height, homeTeamColor, a
         ctx.fillStyle = '#333333';
         ctx.font = `bold ${fontSize}px Arial`;
         ctx.textAlign = 'left';
-        ctx.fillText('Home Substitutes:', 20, startY);
         let currentX = 20;
         for (let i = 0; i < homeSubs.length; i++) {
             const player = homeSubs[i];
@@ -38,7 +37,6 @@ function drawSubstitutesBottom(ctx, homeSubs, awaySubs, height, homeTeamColor, a
         ctx.fillStyle = '#333333';
         ctx.font = `bold ${fontSize}px Arial`;
         ctx.textAlign = 'left';
-        ctx.fillText('Away Substitutes:', 20, awayStartY);
         let currentX = 20;
         for (let i = 0; i < awaySubs.length; i++) {
             const player = awaySubs[i];
@@ -57,7 +55,6 @@ function drawSubstitutesLeft(ctx, homeSubs, awaySubs, homeTeamColor, awayTeamCol
         ctx.fillStyle = '#333333';
         ctx.font = `bold ${fontSize}px Arial`;
         ctx.textAlign = 'left';
-        ctx.fillText('Home', startX, currentY);
         currentY += 20;
         for (let i = 0; i < homeSubs.length; i++) {
             const player = homeSubs[i];
@@ -71,7 +68,6 @@ function drawSubstitutesLeft(ctx, homeSubs, awaySubs, homeTeamColor, awayTeamCol
         ctx.fillStyle = '#333333';
         ctx.font = `bold ${fontSize}px Arial`;
         ctx.textAlign = 'left';
-        ctx.fillText('Away', startX, currentY);
         currentY += 20;
         for (let i = 0; i < awaySubs.length; i++) {
             const player = awaySubs[i];
@@ -89,7 +85,6 @@ function drawSubstitutesRight(ctx, homeSubs, awaySubs, width, homeTeamColor, awa
         ctx.fillStyle = '#333333';
         ctx.font = `bold ${fontSize}px Arial`;
         ctx.textAlign = 'left';
-        ctx.fillText('Home', startX, currentY);
         currentY += 20;
         for (let i = 0; i < homeSubs.length; i++) {
             const player = homeSubs[i];
@@ -103,7 +98,6 @@ function drawSubstitutesRight(ctx, homeSubs, awaySubs, width, homeTeamColor, awa
         ctx.fillStyle = '#333333';
         ctx.font = `bold ${fontSize}px Arial`;
         ctx.textAlign = 'left';
-        ctx.fillText('Away', startX, currentY);
         currentY += 20;
         for (let i = 0; i < awaySubs.length; i++) {
             const player = awaySubs[i];
