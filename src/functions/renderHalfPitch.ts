@@ -57,8 +57,7 @@ export function renderHalfPitch(
     0,
     true,
     true,
-    0,
-    customCoordinates
+    0
   );
 
   // Calculate coordinates for away team players (right half, exclude substitutes)
@@ -71,9 +70,27 @@ export function renderHalfPitch(
     0,
     true,
     false,
-    0,
-    customCoordinates
+    0
   );
+
+  // Apply custom coordinates AFTER calculations
+  if (customCoordinates) {
+    homePlayerCoords.forEach((playerCoord) => {
+      const key = `${playerCoord.player.team}-${playerCoord.player.player.id}`;
+      const customCoord = customCoordinates.get(key);
+      if (customCoord) {
+        playerCoord.coordinates = customCoord;
+      }
+    });
+
+    awayPlayerCoords.forEach((playerCoord) => {
+      const key = `${playerCoord.player.team}-${playerCoord.player.player.id}`;
+      const customCoord = customCoordinates.get(key);
+      if (customCoord) {
+        playerCoord.coordinates = customCoord;
+      }
+    });
+  }
 
   // Calculate smart label positions with cross-team proximity analysis
   const allPlayersWithCoords = [...homePlayerCoords, ...awayPlayerCoords];

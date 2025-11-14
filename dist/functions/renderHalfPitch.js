@@ -13,10 +13,27 @@ export function renderHalfPitch(ctx, lineupData, config, customCoordinates) {
     drawTeamLabel(ctx, lineupData.awayTeam.name, false, config.width, config.homeTeamColor, config.awayTeamColor, config.fontSize);
     // Calculate coordinates for home team players (left half, exclude substitutes)
     const homeFieldPlayers = lineupData.homeTeam.players.filter(p => p.position !== Position.SUBSTITUTE);
-    const homePlayerCoords = calculatePlayerCoordinates(homeFieldPlayers, config.width, config.height, config.layoutType, 0, true, true, 0, customCoordinates);
+    const homePlayerCoords = calculatePlayerCoordinates(homeFieldPlayers, config.width, config.height, config.layoutType, 0, true, true, 0);
     // Calculate coordinates for away team players (right half, exclude substitutes)
     const awayFieldPlayers = lineupData.awayTeam.players.filter(p => p.position !== Position.SUBSTITUTE);
-    const awayPlayerCoords = calculatePlayerCoordinates(awayFieldPlayers, config.width, config.height, config.layoutType, 0, true, false, 0, customCoordinates);
+    const awayPlayerCoords = calculatePlayerCoordinates(awayFieldPlayers, config.width, config.height, config.layoutType, 0, true, false, 0);
+    // Apply custom coordinates AFTER calculations
+    if (customCoordinates) {
+        homePlayerCoords.forEach((playerCoord) => {
+            const key = `${playerCoord.player.team}-${playerCoord.player.player.id}`;
+            const customCoord = customCoordinates.get(key);
+            if (customCoord) {
+                playerCoord.coordinates = customCoord;
+            }
+        });
+        awayPlayerCoords.forEach((playerCoord) => {
+            const key = `${playerCoord.player.team}-${playerCoord.player.player.id}`;
+            const customCoord = customCoordinates.get(key);
+            if (customCoord) {
+                playerCoord.coordinates = customCoord;
+            }
+        });
+    }
     // Calculate smart label positions with cross-team proximity analysis
     const allPlayersWithCoords = [...homePlayerCoords, ...awayPlayerCoords];
     const playersWithLabelPositions = calculateLabelPositions(allPlayersWithCoords, allPlayersWithCoords);

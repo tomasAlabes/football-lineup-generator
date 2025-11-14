@@ -1,4 +1,4 @@
-import type { PlayerPositioning, FieldCoordinates, CustomCoordinatesMap } from '../types.js';
+import type { PlayerPositioning, FieldCoordinates } from '../types.js';
 import { Position, LayoutType } from '../types.js';
 
 interface PlayerCoordinates {
@@ -14,12 +14,11 @@ export function calculatePlayerCoordinates(
   fieldOffsetX = 0,
   isHalfPitch = false,
   isHomeTeam = true,
-  teamOffsetX = 0,
-  customCoordinates?: CustomCoordinatesMap
+  teamOffsetX = 0
 ): PlayerCoordinates[] {
   // Group players by position
   const playersByPosition = new Map<Position, PlayerPositioning[]>();
-  
+
   for (const player of players) {
     if (!playersByPosition.has(player.position)) {
       playersByPosition.set(player.position, []);
@@ -43,25 +42,16 @@ export function calculatePlayerCoordinates(
     };
 
     if (positionPlayers.length === 1) {
-      // Single player - check for custom coordinates first
-      const player = positionPlayers[0];
-      const key = `${player.team}-${player.player.id}`;
-      const customCoords = customCoordinates?.get(key);
-
+      // Single player - use team adjusted coordinates
       result.push({
-        player,
-        coordinates: customCoords || teamAdjustedCoords
+        player: positionPlayers[0],
+        coordinates: teamAdjustedCoords
       });
     } else {
       // Multiple players - spread them around the team adjusted base position
       for (let index = 0; index < positionPlayers.length; index++) {
         const player = positionPlayers[index];
-
-        // Check for custom coordinates first
-        const key = `${player.team}-${player.player.id}`;
-        const customCoords = customCoordinates?.get(key);
-
-        const offsetCoords = customCoords || calculatePositionOffset(teamAdjustedCoords, index, positionPlayers.length, position, layoutType);
+        const offsetCoords = calculatePositionOffset(teamAdjustedCoords, index, positionPlayers.length, position, layoutType);
         result.push({
           player,
           coordinates: offsetCoords

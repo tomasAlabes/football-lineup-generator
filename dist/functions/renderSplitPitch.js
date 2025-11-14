@@ -16,11 +16,11 @@ export function renderSplitPitch(ctx, lineupData, config, customCoordinates) {
     drawTeamLabelRotated90CCW(ctx, lineupData.awayTeam.name, false, config.width, config.height, config.homeTeamColor, config.awayTeamColor, config.fontSize, config.height + gap);
     // Calculate coordinates for home team players (first field, exclude substitutes)
     const homeFieldPlayers = lineupData.homeTeam.players.filter(p => p.position !== Position.SUBSTITUTE);
-    const homePlayerCoordsOriginal = calculatePlayerCoordinates(homeFieldPlayers, config.width, config.height, config.layoutType, 0, false, true, 0, customCoordinates);
+    const homePlayerCoordsOriginal = calculatePlayerCoordinates(homeFieldPlayers, config.width, config.height, config.layoutType, 0, false, true, 0);
     // Calculate coordinates for away team players (second field, exclude substitutes)
     const awayFieldPlayers = lineupData.awayTeam.players.filter(p => p.position !== Position.SUBSTITUTE);
     const awayPlayerCoordsOriginal = calculatePlayerCoordinates(awayFieldPlayers, config.width, config.height, config.layoutType, 0, // No offset since we'll handle positioning with rotation
-    false, true, 0, customCoordinates);
+    false, true, 0);
     // Rotate coordinates for both teams
     const homePlayerCoords = rotatePlayerCoordinates90CCW(homePlayerCoordsOriginal, config.width, config.height);
     const awayPlayerCoords = rotatePlayerCoordinates90CCW(awayPlayerCoordsOriginal, config.width, config.height).map(({ player, coordinates }) => ({
@@ -30,6 +30,23 @@ export function renderSplitPitch(ctx, lineupData, config, customCoordinates) {
             y: coordinates.y
         }
     }));
+    // Apply custom coordinates AFTER all transformations (rotation + offset)
+    if (customCoordinates) {
+        homePlayerCoords.forEach((playerCoord) => {
+            const key = `${playerCoord.player.team}-${playerCoord.player.player.id}`;
+            const customCoord = customCoordinates.get(key);
+            if (customCoord) {
+                playerCoord.coordinates = customCoord;
+            }
+        });
+        awayPlayerCoords.forEach((playerCoord) => {
+            const key = `${playerCoord.player.team}-${playerCoord.player.player.id}`;
+            const customCoord = customCoordinates.get(key);
+            if (customCoord) {
+                playerCoord.coordinates = customCoord;
+            }
+        });
+    }
     // Calculate smart label positions for each team separately (since they're on different rotated fields)
     const homePlayersWithLabelPositions = calculateLabelPositions(homePlayerCoords);
     const awayPlayersWithLabelPositions = calculateLabelPositions(awayPlayerCoords);

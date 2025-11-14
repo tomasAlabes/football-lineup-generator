@@ -20,6 +20,26 @@ export function rotateCoordinates90CCW(
 }
 
 /**
+ * Unrotates coordinates (reverses 90 degrees counter-clockwise rotation)
+ * This is a 90-degree clockwise rotation
+ * @param coords Rotated coordinates
+ * @param originalWidth Original width before rotation
+ * @param originalHeight Original height before rotation (now the rotated width)
+ * @returns Unrotated coordinates
+ */
+export function unrotateCoordinates90CCW(
+  coords: FieldCoordinates,
+  originalWidth: number,
+  originalHeight: number
+): FieldCoordinates {
+  // Reverse of CCW rotation: (x, y) -> (originalWidth - y, x)
+  return {
+    x: originalWidth - coords.y,
+    y: coords.x
+  };
+}
+
+/**
  * Rotates multiple coordinates 90 degrees counter-clockwise
  */
 export function rotatePlayerCoordinates90CCW(

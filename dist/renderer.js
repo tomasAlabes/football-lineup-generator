@@ -75,14 +75,25 @@ export class FootballLineupRenderer {
         }
         // Initialize interactive controller if interactive mode is enabled
         if (this.config.interactive) {
-            this.interactiveController = new InteractiveController(this.canvas, this.config, () => this.render(this.lineupData));
+            // Calculate translation offset for substitutes on the left
+            let translateX = 0;
+            let translateY = 0;
+            if (this.config.layoutType !== LayoutType.SPLIT_PITCH &&
+                this.config.showSubstitutes.enabled &&
+                this.config.showSubstitutes.position === SubstitutesPosition.LEFT) {
+                translateX = 180;
+            }
+            this.interactiveController = new InteractiveController(this.canvas, this.config, () => this.render(this.lineupData), translateX, translateY);
         }
     }
     render(lineupData) {
         // Store lineup data for re-rendering
         this.lineupData = lineupData;
-        // Clear canvas
+        // Clear canvas - need to account for any translation
+        this.ctx.save();
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.restore();
         // Get custom coordinates if in interactive mode
         const customCoordinates = this.interactiveController?.getCustomCoordinates();
         let playerCoordinates = [];

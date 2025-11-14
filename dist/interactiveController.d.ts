@@ -13,10 +13,12 @@ export declare class InteractiveController {
     private config;
     private renderCallback;
     private isDragging;
+    private canvasTranslateX;
+    private canvasTranslateY;
     constructor(canvas: HTMLCanvasElement, config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove'>> & {
         interactive: boolean;
         onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void;
-    }, renderCallback: () => void);
+    }, renderCallback: () => void, translateX?: number, translateY?: number);
     private attachEventListeners;
     detachEventListeners(): void;
     updatePlayerCoordinates(coordinates: PlayerWithCoordinates[]): void;

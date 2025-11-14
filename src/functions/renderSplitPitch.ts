@@ -4,7 +4,7 @@ import { drawFieldRotated90CCW } from './drawFieldRotated.js';
 import { drawTeamLabelRotated90CCW } from './drawTeamLabelRotated.js';
 import { calculatePlayerCoordinates } from './calculatePlayerCoordinates.js';
 import { calculateLabelPositions } from './calculateLabelPositions.js';
-import { rotatePlayerCoordinates90CCW } from './rotateCoordinates.js';
+import { rotatePlayerCoordinates90CCW, unrotateCoordinates90CCW } from './rotateCoordinates.js';
 import { drawPlayer } from './drawPlayer.js';
 import { drawSubstitutesSplit } from './drawSubstitutesSplit.js';
 
@@ -75,8 +75,7 @@ export function renderSplitPitch(
     0,
     false,
     true,
-    0,
-    customCoordinates
+    0
   );
 
   // Calculate coordinates for away team players (second field, exclude substitutes)
@@ -89,8 +88,7 @@ export function renderSplitPitch(
     0, // No offset since we'll handle positioning with rotation
     false,
     true,
-    0,
-    customCoordinates
+    0
   );
 
   // Rotate coordinates for both teams
@@ -111,6 +109,25 @@ export function renderSplitPitch(
       y: coordinates.y
     }
   }));
+
+  // Apply custom coordinates AFTER all transformations (rotation + offset)
+  if (customCoordinates) {
+    homePlayerCoords.forEach((playerCoord) => {
+      const key = `${playerCoord.player.team}-${playerCoord.player.player.id}`;
+      const customCoord = customCoordinates.get(key);
+      if (customCoord) {
+        playerCoord.coordinates = customCoord;
+      }
+    });
+
+    awayPlayerCoords.forEach((playerCoord) => {
+      const key = `${playerCoord.player.team}-${playerCoord.player.player.id}`;
+      const customCoord = customCoordinates.get(key);
+      if (customCoord) {
+        playerCoord.coordinates = customCoord;
+      }
+    });
+  }
 
   // Calculate smart label positions for each team separately (since they're on different rotated fields)
   const homePlayersWithLabelPositions = calculateLabelPositions(homePlayerCoords);

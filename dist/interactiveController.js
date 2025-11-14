@@ -1,11 +1,13 @@
 import { Position } from './types.js';
 export class InteractiveController {
-    constructor(canvas, config, renderCallback) {
+    constructor(canvas, config, renderCallback, translateX = 0, translateY = 0) {
         this.lineupData = null;
         this.playerCoordinates = [];
         this.customCoordinates = new Map();
         this.dragState = null;
         this.isDragging = false;
+        this.canvasTranslateX = 0;
+        this.canvasTranslateY = 0;
         this.handleMouseDown = (event) => {
             const coords = this.getCanvasCoordinates(event.clientX, event.clientY);
             const player = this.findPlayerAtPosition(coords.x, coords.y);
@@ -24,7 +26,8 @@ export class InteractiveController {
         this.handleMouseMove = (event) => {
             const coords = this.getCanvasCoordinates(event.clientX, event.clientY);
             if (this.isDragging && this.dragState) {
-                // Update custom coordinates
+                // Update custom coordinates - store directly in canvas space
+                // Custom coordinates are applied AFTER all transformations in render functions
                 const newX = coords.x - this.dragState.offsetX;
                 const newY = coords.y - this.dragState.offsetY;
                 const key = `${this.dragState.player.team}-${this.dragState.player.player.id}`;
@@ -76,7 +79,7 @@ export class InteractiveController {
             if (this.isDragging && this.dragState && event.touches.length === 1) {
                 const touch = event.touches[0];
                 const coords = this.getCanvasCoordinates(touch.clientX, touch.clientY);
-                // Update custom coordinates
+                // Update custom coordinates - store directly in canvas space
                 const newX = coords.x - this.dragState.offsetX;
                 const newY = coords.y - this.dragState.offsetY;
                 const key = `${this.dragState.player.team}-${this.dragState.player.player.id}`;
@@ -101,6 +104,8 @@ export class InteractiveController {
         this.canvas = canvas;
         this.config = config;
         this.renderCallback = renderCallback;
+        this.canvasTranslateX = translateX;
+        this.canvasTranslateY = translateY;
         if (this.config.interactive) {
             this.attachEventListeners();
         }
@@ -150,8 +155,8 @@ export class InteractiveController {
         const scaleX = this.canvas.width / rect.width;
         const scaleY = this.canvas.height / rect.height;
         return {
-            x: (clientX - rect.left) * scaleX,
-            y: (clientY - rect.top) * scaleY,
+            x: (clientX - rect.left) * scaleX - this.canvasTranslateX,
+            y: (clientY - rect.top) * scaleY - this.canvasTranslateY,
         };
     }
     findPlayerAtPosition(x, y) {

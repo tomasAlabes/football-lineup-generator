@@ -33,6 +33,8 @@ export class InteractiveController {
   };
   private renderCallback: () => void;
   private isDragging = false;
+  private canvasTranslateX: number = 0;
+  private canvasTranslateY: number = 0;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -40,11 +42,15 @@ export class InteractiveController {
       interactive: boolean;
       onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void;
     },
-    renderCallback: () => void
+    renderCallback: () => void,
+    translateX: number = 0,
+    translateY: number = 0
   ) {
     this.canvas = canvas;
     this.config = config;
     this.renderCallback = renderCallback;
+    this.canvasTranslateX = translateX;
+    this.canvasTranslateY = translateY;
 
     if (this.config.interactive) {
       this.attachEventListeners();
@@ -107,8 +113,8 @@ export class InteractiveController {
     const scaleY = this.canvas.height / rect.height;
 
     return {
-      x: (clientX - rect.left) * scaleX,
-      y: (clientY - rect.top) * scaleY,
+      x: (clientX - rect.left) * scaleX - this.canvasTranslateX,
+      y: (clientY - rect.top) * scaleY - this.canvasTranslateY,
     };
   }
 
@@ -157,7 +163,8 @@ export class InteractiveController {
     const coords = this.getCanvasCoordinates(event.clientX, event.clientY);
 
     if (this.isDragging && this.dragState) {
-      // Update custom coordinates
+      // Update custom coordinates - store directly in canvas space
+      // Custom coordinates are applied AFTER all transformations in render functions
       const newX = coords.x - this.dragState.offsetX;
       const newY = coords.y - this.dragState.offsetY;
 
@@ -224,7 +231,7 @@ export class InteractiveController {
       const touch = event.touches[0];
       const coords = this.getCanvasCoordinates(touch.clientX, touch.clientY);
 
-      // Update custom coordinates
+      // Update custom coordinates - store directly in canvas space
       const newX = coords.x - this.dragState.offsetX;
       const newY = coords.y - this.dragState.offsetY;
 

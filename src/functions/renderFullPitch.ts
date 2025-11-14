@@ -59,8 +59,7 @@ export function renderFullPitch(
     0,
     false,
     true,
-    -20, // Move home team left by 20px
-    customCoordinates
+    -20 // Move home team left by 20px
   );
 
   // Calculate coordinates for away team players (exclude substitutes)
@@ -74,8 +73,7 @@ export function renderFullPitch(
     0,
     false,
     false,
-    -20, // This becomes +20px after mirroring, moving away team right
-    customCoordinates
+    -20 // This becomes +20px after mirroring, moving away team right
   );
 
   // Create mirrored coordinates for away team
@@ -83,6 +81,25 @@ export function renderFullPitch(
     player,
     coordinates: mirrorCoordinatesForAwayTeam(coordinates, config.width)
   }));
+
+  // Apply custom coordinates AFTER transformations
+  if (customCoordinates) {
+    homePlayerCoords.forEach((playerCoord) => {
+      const key = `${playerCoord.player.team}-${playerCoord.player.player.id}`;
+      const customCoord = customCoordinates.get(key);
+      if (customCoord) {
+        playerCoord.coordinates = customCoord;
+      }
+    });
+
+    awayPlayerCoordsWithMirroring.forEach((playerCoord) => {
+      const key = `${playerCoord.player.team}-${playerCoord.player.player.id}`;
+      const customCoord = customCoordinates.get(key);
+      if (customCoord) {
+        playerCoord.coordinates = customCoord;
+      }
+    });
+  }
 
   // Calculate smart label positions with cross-team proximity analysis
   const allPlayersWithCoords = [...homePlayerCoords, ...awayPlayerCoordsWithMirroring];
@@ -145,8 +162,9 @@ export function renderFullPitch(
   }
 
   // Return all player coordinates for interactive controller
-  return [
-    ...homePlayerCoords.map(pc => ({ ...pc, isHomeTeam: true })),
-    ...awayPlayerCoordsWithMirroring.map(pc => ({ ...pc, isHomeTeam: false }))
-  ];
+  // Note: Don't use spread operator here as it would lose the mutations made above
+  const homeCoords = homePlayerCoords.map(pc => ({ ...pc, isHomeTeam: true }));
+  const awayCoords = awayPlayerCoordsWithMirroring.map(pc => ({ ...pc, isHomeTeam: false }));
+
+  return [...homeCoords, ...awayCoords];
 } 
