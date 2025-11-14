@@ -1,4 +1,4 @@
-import type { LineupData, LineupConfig, SubstitutesConfig } from '../types.js';
+import type { LineupData, LineupConfig, SubstitutesConfig, CustomCoordinatesMap } from '../types.js';
 import { Position } from '../types.js';
 import { drawField } from './drawField.js';
 import { drawTeamLabel } from './drawTeamLabel.js';
@@ -11,8 +11,13 @@ import { drawSubstitutesList } from './drawSubstitutesList.js';
 export function renderHalfPitch(
   ctx: CanvasRenderingContext2D,
   lineupData: LineupData,
-  config: Required<Omit<LineupConfig, 'showSubstitutes'>> & { showSubstitutes: SubstitutesConfig }
-): void {
+  config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove'>> & {
+    showSubstitutes: SubstitutesConfig;
+    interactive?: boolean;
+    onPlayerMove?: (playerId: number, team: any, x: number, y: number) => void;
+  },
+  customCoordinates?: CustomCoordinatesMap
+): any[] {
   // Draw field
   drawField(
     ctx,
@@ -51,7 +56,9 @@ export function renderHalfPitch(
     config.layoutType,
     0,
     true,
-    true
+    true,
+    0,
+    customCoordinates
   );
 
   // Calculate coordinates for away team players (right half, exclude substitutes)
@@ -63,7 +70,9 @@ export function renderHalfPitch(
     config.layoutType,
     0,
     true,
-    false
+    false,
+    0,
+    customCoordinates
   );
 
   // Calculate smart label positions with cross-team proximity analysis
@@ -125,4 +134,10 @@ export function renderHalfPitch(
       config.showSubstitutes.position
     );
   }
+
+  // Return all player coordinates for interactive controller
+  return [
+    ...homePlayerCoords.map(pc => ({ ...pc, isHomeTeam: true })),
+    ...awayPlayerCoords.map(pc => ({ ...pc, isHomeTeam: false }))
+  ];
 } 

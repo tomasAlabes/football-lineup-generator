@@ -22,6 +22,7 @@ A TypeScript library for generating visual football (soccer) lineup diagrams fro
 - 🔧 TypeScript support with full type definitions
 - ⚡ Lightweight with no external dependencies
 - 🏆 Support for substitutes and bench players
+- 🎮 **Interactive mode** - Drag and drop players to customize formations
 
 ## Screenshots
 
@@ -184,6 +185,8 @@ interface LineupConfig {
   fontSize?: number;           // Text font size (default: 12)
   playerCircleSize?: number;   // Player circle radius (default: 20)
   backgroundImage?: string | HTMLImageElement; // Custom background image
+  interactive?: boolean;       // Enable interactive mode for drag-and-drop (default: false)
+  onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void; // Callback when player is moved
 }
 ```
 
@@ -336,6 +339,72 @@ const config = {
 
 const canvas = await generateLineup(lineupData, config);
 document.getElementById('lineup-container').appendChild(canvas);
+```
+
+## Interactive Mode
+
+Enable interactive mode to allow users to drag and drop players to customize formations:
+
+```typescript
+import { generateLineup, Team, Position, LayoutType } from 'football-lineup-generator';
+
+const lineupData = {
+  // ... your lineup data
+};
+
+const config = {
+  layoutType: LayoutType.FULL_PITCH,
+  interactive: true, // Enable interactive mode
+  onPlayerMove: (playerId, team, x, y) => {
+    // This callback is triggered when a player is moved
+    console.log(`Player ${playerId} from team ${team} moved to (${x}, ${y})`);
+
+    // You can save the new positions to your backend here
+    savePlayerPosition(playerId, team, x, y);
+  }
+};
+
+const canvas = generateLineup(lineupData, config);
+document.body.appendChild(canvas);
+```
+
+### Interactive Mode Features
+
+- **Drag and Drop**: Click and drag any player to reposition them on the field
+- **Real-time Updates**: The canvas re-renders instantly as you drag players
+- **Position Callbacks**: Get notified when a player's position changes via the `onPlayerMove` callback
+- **Touch Support**: Works with both mouse and touch events for mobile devices
+- **Cursor Feedback**: The cursor changes to indicate when you're hovering over a draggable player
+
+### Using the FootballLineupRenderer Class
+
+For more control over the interactive features, use the `FootballLineupRenderer` class directly:
+
+```typescript
+import { FootballLineupRenderer, Team, Position, LayoutType } from 'football-lineup-generator';
+
+const canvas = document.createElement('canvas');
+const renderer = new FootballLineupRenderer(canvas, {
+  interactive: true,
+  onPlayerMove: (playerId, team, x, y) => {
+    console.log('Player moved:', playerId, team, x, y);
+  }
+});
+
+renderer.render(lineupData);
+document.body.appendChild(canvas);
+
+// Get all custom coordinates
+const customCoords = renderer.getCustomCoordinates();
+
+// Set a specific player's position programmatically
+renderer.setCustomCoordinate(playerId, team, x, y);
+
+// Clear all custom positions (reset to default)
+renderer.clearCustomCoordinates();
+
+// Clean up event listeners when done
+renderer.destroy();
 ```
 
 ## Backend Integration

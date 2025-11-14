@@ -6,7 +6,7 @@ import { calculateLabelPositions } from './calculateLabelPositions.js';
 import { rotatePlayerCoordinates90CCW } from './rotateCoordinates.js';
 import { drawPlayer } from './drawPlayer.js';
 import { drawSubstitutesSplit } from './drawSubstitutesSplit.js';
-export function renderSplitPitch(ctx, lineupData, config) {
+export function renderSplitPitch(ctx, lineupData, config, customCoordinates) {
     const gap = 60; // Gap between the two separate fields
     // Draw FIRST ROTATED FIELD for home team (left side)
     drawFieldRotated90CCW(ctx, config.width, config.height, config.fieldColor, config.lineColor, 0, true);
@@ -16,11 +16,11 @@ export function renderSplitPitch(ctx, lineupData, config) {
     drawTeamLabelRotated90CCW(ctx, lineupData.awayTeam.name, false, config.width, config.height, config.homeTeamColor, config.awayTeamColor, config.fontSize, config.height + gap);
     // Calculate coordinates for home team players (first field, exclude substitutes)
     const homeFieldPlayers = lineupData.homeTeam.players.filter(p => p.position !== Position.SUBSTITUTE);
-    const homePlayerCoordsOriginal = calculatePlayerCoordinates(homeFieldPlayers, config.width, config.height, config.layoutType, 0, false, true);
+    const homePlayerCoordsOriginal = calculatePlayerCoordinates(homeFieldPlayers, config.width, config.height, config.layoutType, 0, false, true, 0, customCoordinates);
     // Calculate coordinates for away team players (second field, exclude substitutes)
     const awayFieldPlayers = lineupData.awayTeam.players.filter(p => p.position !== Position.SUBSTITUTE);
     const awayPlayerCoordsOriginal = calculatePlayerCoordinates(awayFieldPlayers, config.width, config.height, config.layoutType, 0, // No offset since we'll handle positioning with rotation
-    false, true);
+    false, true, 0, customCoordinates);
     // Rotate coordinates for both teams
     const homePlayerCoords = rotatePlayerCoordinates90CCW(homePlayerCoordsOriginal, config.width, config.height);
     const awayPlayerCoords = rotatePlayerCoordinates90CCW(awayPlayerCoordsOriginal, config.width, config.height).map(({ player, coordinates }) => ({
@@ -45,4 +45,9 @@ export function renderSplitPitch(ctx, lineupData, config) {
     if (config.showSubstitutes.enabled) {
         drawSubstitutesSplit(ctx, lineupData, config.height, config.height + gap, config.homeTeamColor, config.awayTeamColor, config.playerCircleSize, config.showJerseyNumbers, config.showPlayerNames, config.fontSize);
     }
+    // Return all player coordinates for interactive controller
+    return [
+        ...homePlayerCoords.map(pc => ({ ...pc, isHomeTeam: true })),
+        ...awayPlayerCoords.map(pc => ({ ...pc, isHomeTeam: false }))
+    ];
 }

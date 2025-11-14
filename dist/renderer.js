@@ -3,8 +3,12 @@ import { LayoutType, SubstitutesPosition } from './types.js';
 import { renderFullPitch } from './functions/renderFullPitch.js';
 import { renderHalfPitch } from './functions/renderHalfPitch.js';
 import { renderSplitPitch } from './functions/renderSplitPitch.js';
+// Import interactive controller
+import { InteractiveController } from './interactiveController.js';
 export class FootballLineupRenderer {
     constructor(canvas, config = {}) {
+        this.interactiveController = null;
+        this.lineupData = null;
         this.canvas = canvas;
         const context = canvas.getContext('2d');
         if (!context) {
@@ -42,6 +46,8 @@ export class FootballLineupRenderer {
             awayTeamColor: config.awayTeamColor ?? '#2196F3',
             fontSize: config.fontSize ?? 12,
             playerCircleSize: config.playerCircleSize ?? 16, // Reduced from 20 to 16
+            interactive: config.interactive ?? false,
+            onPlayerMove: config.onPlayerMove,
         };
         // Adjust canvas size for split pitch layout
         if (this.config.layoutType === LayoutType.SPLIT_PITCH) {
@@ -67,20 +73,58 @@ export class FootballLineupRenderer {
                 }
             }
         }
+        // Initialize interactive controller if interactive mode is enabled
+        if (this.config.interactive) {
+            this.interactiveController = new InteractiveController(this.canvas, this.config, () => this.render(this.lineupData));
+        }
     }
     render(lineupData) {
+        // Store lineup data for re-rendering
+        this.lineupData = lineupData;
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        // Get custom coordinates if in interactive mode
+        const customCoordinates = this.interactiveController?.getCustomCoordinates();
+        let playerCoordinates = [];
         switch (this.config.layoutType) {
             case LayoutType.FULL_PITCH:
-                renderFullPitch(this.ctx, lineupData, this.config);
+                playerCoordinates = renderFullPitch(this.ctx, lineupData, this.config, customCoordinates);
                 break;
             case LayoutType.HALF_PITCH:
-                renderHalfPitch(this.ctx, lineupData, this.config);
+                playerCoordinates = renderHalfPitch(this.ctx, lineupData, this.config, customCoordinates);
                 break;
             case LayoutType.SPLIT_PITCH:
-                renderSplitPitch(this.ctx, lineupData, this.config);
+                playerCoordinates = renderSplitPitch(this.ctx, lineupData, this.config, customCoordinates);
                 break;
+        }
+        // Update interactive controller with player coordinates
+        if (this.interactiveController) {
+            this.interactiveController.updatePlayerCoordinates(playerCoordinates);
+            this.interactiveController.updateLineupData(lineupData);
+        }
+    }
+    destroy() {
+        if (this.interactiveController) {
+            this.interactiveController.detachEventListeners();
+        }
+    }
+    getCustomCoordinates() {
+        return this.interactiveController?.getCustomCoordinates();
+    }
+    setCustomCoordinate(playerId, team, x, y) {
+        if (this.interactiveController) {
+            this.interactiveController.setCustomCoordinate(playerId, team, { x, y });
+            if (this.lineupData) {
+                this.render(this.lineupData);
+            }
+        }
+    }
+    clearCustomCoordinates() {
+        if (this.interactiveController) {
+            this.interactiveController.clearCustomCoordinates();
+            if (this.lineupData) {
+                this.render(this.lineupData);
+            }
         }
     }
 }

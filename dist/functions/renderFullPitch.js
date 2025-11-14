@@ -6,7 +6,7 @@ import { calculateLabelPositions } from './calculateLabelPositions.js';
 import { drawPlayer } from './drawPlayer.js';
 import { mirrorCoordinatesForAwayTeam } from './mirrorCoordinates.js';
 import { drawSubstitutesList } from './drawSubstitutesList.js';
-export function renderFullPitch(ctx, lineupData, config) {
+export function renderFullPitch(ctx, lineupData, config, customCoordinates) {
     // Draw field
     drawField(ctx, config.width, config.height, config.fieldColor, config.lineColor);
     // Draw team labels
@@ -15,13 +15,13 @@ export function renderFullPitch(ctx, lineupData, config) {
     // Calculate coordinates for home team players (exclude substitutes)
     // Apply -20px offset to move home team left and prevent center overlap
     const homeFieldPlayers = lineupData.homeTeam.players.filter(p => p.position !== Position.SUBSTITUTE);
-    const homePlayerCoords = calculatePlayerCoordinates(homeFieldPlayers, config.width, config.height, config.layoutType, 0, false, true, -20 // Move home team left by 20px
-    );
+    const homePlayerCoords = calculatePlayerCoordinates(homeFieldPlayers, config.width, config.height, config.layoutType, 0, false, true, -20, // Move home team left by 20px
+    customCoordinates);
     // Calculate coordinates for away team players (exclude substitutes)
     // Apply -20px offset which will become +20px after mirroring, moving away team right
     const awayFieldPlayers = lineupData.awayTeam.players.filter(p => p.position !== Position.SUBSTITUTE);
-    const awayPlayerCoords = calculatePlayerCoordinates(awayFieldPlayers, config.width, config.height, config.layoutType, 0, false, false, -20 // This becomes +20px after mirroring, moving away team right
-    );
+    const awayPlayerCoords = calculatePlayerCoordinates(awayFieldPlayers, config.width, config.height, config.layoutType, 0, false, false, -20, // This becomes +20px after mirroring, moving away team right
+    customCoordinates);
     // Create mirrored coordinates for away team
     const awayPlayerCoordsWithMirroring = awayPlayerCoords.map(({ player, coordinates }) => ({
         player,
@@ -48,4 +48,9 @@ export function renderFullPitch(ctx, lineupData, config) {
     if (config.showSubstitutes.enabled) {
         drawSubstitutesList(ctx, lineupData, config.width, config.height, config.homeTeamColor, config.awayTeamColor, config.fontSize, config.showSubstitutes.position);
     }
+    // Return all player coordinates for interactive controller
+    return [
+        ...homePlayerCoords.map(pc => ({ ...pc, isHomeTeam: true })),
+        ...awayPlayerCoordsWithMirroring.map(pc => ({ ...pc, isHomeTeam: false }))
+    ];
 }

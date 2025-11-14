@@ -5,7 +5,7 @@ import { calculatePlayerCoordinates } from './calculatePlayerCoordinates.js';
 import { calculateLabelPositions } from './calculateLabelPositions.js';
 import { drawPlayer } from './drawPlayer.js';
 import { drawSubstitutesList } from './drawSubstitutesList.js';
-export function renderHalfPitch(ctx, lineupData, config) {
+export function renderHalfPitch(ctx, lineupData, config, customCoordinates) {
     // Draw field
     drawField(ctx, config.width, config.height, config.fieldColor, config.lineColor);
     // Draw team labels
@@ -13,10 +13,10 @@ export function renderHalfPitch(ctx, lineupData, config) {
     drawTeamLabel(ctx, lineupData.awayTeam.name, false, config.width, config.homeTeamColor, config.awayTeamColor, config.fontSize);
     // Calculate coordinates for home team players (left half, exclude substitutes)
     const homeFieldPlayers = lineupData.homeTeam.players.filter(p => p.position !== Position.SUBSTITUTE);
-    const homePlayerCoords = calculatePlayerCoordinates(homeFieldPlayers, config.width, config.height, config.layoutType, 0, true, true);
+    const homePlayerCoords = calculatePlayerCoordinates(homeFieldPlayers, config.width, config.height, config.layoutType, 0, true, true, 0, customCoordinates);
     // Calculate coordinates for away team players (right half, exclude substitutes)
     const awayFieldPlayers = lineupData.awayTeam.players.filter(p => p.position !== Position.SUBSTITUTE);
-    const awayPlayerCoords = calculatePlayerCoordinates(awayFieldPlayers, config.width, config.height, config.layoutType, 0, true, false);
+    const awayPlayerCoords = calculatePlayerCoordinates(awayFieldPlayers, config.width, config.height, config.layoutType, 0, true, false, 0, customCoordinates);
     // Calculate smart label positions with cross-team proximity analysis
     const allPlayersWithCoords = [...homePlayerCoords, ...awayPlayerCoords];
     const playersWithLabelPositions = calculateLabelPositions(allPlayersWithCoords, allPlayersWithCoords);
@@ -38,4 +38,9 @@ export function renderHalfPitch(ctx, lineupData, config) {
     if (config.showSubstitutes.enabled) {
         drawSubstitutesList(ctx, lineupData, config.width, config.height, config.homeTeamColor, config.awayTeamColor, config.fontSize, config.showSubstitutes.position);
     }
+    // Return all player coordinates for interactive controller
+    return [
+        ...homePlayerCoords.map(pc => ({ ...pc, isHomeTeam: true })),
+        ...awayPlayerCoords.map(pc => ({ ...pc, isHomeTeam: false }))
+    ];
 }

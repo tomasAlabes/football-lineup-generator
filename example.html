@@ -177,19 +177,26 @@
             
             <h4>Layout Options:</h4>
             <div class="grid">
-                <label>Layout Type: 
+                <label>Layout Type:
                     <select id="layoutType">
                         <option value="split_pitch" selected>Split Pitch (Separate fields)</option>
                         <option value="half_pitch">Half Pitch (Teams in their halves)</option>
                         <option value="full_pitch">Full Pitch (Both teams across field)</option>
                     </select>
                 </label>
-                <label>Canvas Size: 
+                <label>Canvas Size:
                     <select id="canvasSize">
                         <option value="800x600">800x600</option>
                         <option value="1000x700" selected>1000x700</option>
                         <option value="1200x800">1200x800</option>
                     </select>
+                </label>
+            </div>
+
+            <div style="margin-top: 10px;">
+                <label>
+                    <input type="checkbox" id="interactiveMode" />
+                    <strong>Interactive Mode</strong> - Drag and move players on the field
                 </label>
             </div>
 
@@ -218,6 +225,11 @@
         <div class="lineup-container">
             <div id="lineup-display">
                 <p>Click "Generate Lineup" to see the visualization!</p>
+            </div>
+            <div id="interactive-info" style="margin-top: 20px; padding: 15px; background: #f0f8ff; border-radius: 8px; display: none;">
+                <h4 style="margin-top: 0;">🎮 Interactive Mode Active</h4>
+                <p>Click and drag any player to move them to a new position!</p>
+                <p id="last-move" style="color: #666; font-style: italic;">No players moved yet...</p>
             </div>
         </div>
     </div>
@@ -440,9 +452,10 @@
             const awayColor = document.getElementById('awayColor').value;
             const canvasSize = document.getElementById('canvasSize').value.split('x');
             const layoutType = document.getElementById('layoutType').value;
+            const interactiveMode = document.getElementById('interactiveMode').checked;
 
             const formation = formations[currentFormation];
-            
+
             const lineupData = {
                 homeTeam: {
                     name: homeTeamName,
@@ -476,16 +489,38 @@
                 layoutType: layoutType,
                 fieldColor: fieldColor,
                 homeTeamColor: homeColor,
-                awayTeamColor: awayColor
+                awayTeamColor: awayColor,
+                interactive: interactiveMode,
+                onPlayerMove: interactiveMode ? (playerId, team, x, y) => {
+                    // Find player name
+                    const allPlayers = [...lineupData.homeTeam.players, ...lineupData.awayTeam.players];
+                    const movedPlayer = allPlayers.find(p => p.player.id === playerId && p.team === team);
+                    const playerName = movedPlayer ? movedPlayer.player.name : `Player ${playerId}`;
+                    const teamName = team === Team.RED ? homeTeamName : awayTeamName;
+
+                    // Update the last move display
+                    const lastMoveEl = document.getElementById('last-move');
+                    if (lastMoveEl) {
+                        lastMoveEl.textContent = `Last move: ${playerName} (${teamName}) moved to (${Math.round(x)}, ${Math.round(y)})`;
+                    }
+
+                    console.log(`Player moved: ${playerName} from ${teamName} to position (${x}, ${y})`);
+                } : undefined
             };
 
             try {
                 const canvas = generateLineup(lineupData, config);
-                
+
                 const display = document.getElementById('lineup-display');
                 display.innerHTML = '';
                 display.appendChild(canvas);
-                
+
+                // Show/hide interactive info
+                const interactiveInfo = document.getElementById('interactive-info');
+                if (interactiveInfo) {
+                    interactiveInfo.style.display = interactiveMode ? 'block' : 'none';
+                }
+
                 // Add player lists below the canvas
                 const playerListsHTML = createPlayerLists(lineupData, homeColor, awayColor);
                 display.insertAdjacentHTML('beforeend', playerListsHTML);
@@ -518,7 +553,8 @@
             });
 
             // Auto-generate lineup when other controls change
-            [canvasSizeSelect, fieldColorInput, homeColorInput, awayColorInput, homeTeamInput, awayTeamInput].forEach(control => {
+            const interactiveModeCheckbox = document.getElementById('interactiveMode');
+            [canvasSizeSelect, fieldColorInput, homeColorInput, awayColorInput, homeTeamInput, awayTeamInput, interactiveModeCheckbox].forEach(control => {
                 control.addEventListener('change', function() {
                     generateLineupExample();
                 });

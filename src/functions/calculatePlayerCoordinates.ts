@@ -1,4 +1,4 @@
-import type { PlayerPositioning, FieldCoordinates } from '../types.js';
+import type { PlayerPositioning, FieldCoordinates, CustomCoordinatesMap } from '../types.js';
 import { Position, LayoutType } from '../types.js';
 
 interface PlayerCoordinates {
@@ -14,7 +14,8 @@ export function calculatePlayerCoordinates(
   fieldOffsetX = 0,
   isHalfPitch = false,
   isHomeTeam = true,
-  teamOffsetX = 0
+  teamOffsetX = 0,
+  customCoordinates?: CustomCoordinatesMap
 ): PlayerCoordinates[] {
   // Group players by position
   const playersByPosition = new Map<Position, PlayerPositioning[]>();
@@ -30,28 +31,37 @@ export function calculatePlayerCoordinates(
   }
 
   const result: PlayerCoordinates[] = [];
-  
+
   // Calculate base coordinates for each position
   for (const [position, positionPlayers] of playersByPosition.entries()) {
     const baseCoords = getBasePositionCoordinates(position, width, height, layoutType, fieldOffsetX, isHalfPitch, isHomeTeam);
-    
+
     // Apply team offset to base coordinates
     const teamAdjustedCoords = {
       x: baseCoords.x + teamOffsetX,
       y: baseCoords.y
     };
-    
+
     if (positionPlayers.length === 1) {
-      // Single player - use team adjusted coordinates
+      // Single player - check for custom coordinates first
+      const player = positionPlayers[0];
+      const key = `${player.team}-${player.player.id}`;
+      const customCoords = customCoordinates?.get(key);
+
       result.push({
-        player: positionPlayers[0],
-        coordinates: teamAdjustedCoords
+        player,
+        coordinates: customCoords || teamAdjustedCoords
       });
     } else {
       // Multiple players - spread them around the team adjusted base position
       for (let index = 0; index < positionPlayers.length; index++) {
         const player = positionPlayers[index];
-        const offsetCoords = calculatePositionOffset(teamAdjustedCoords, index, positionPlayers.length, position, layoutType);
+
+        // Check for custom coordinates first
+        const key = `${player.team}-${player.player.id}`;
+        const customCoords = customCoordinates?.get(key);
+
+        const offsetCoords = customCoords || calculatePositionOffset(teamAdjustedCoords, index, positionPlayers.length, position, layoutType);
         result.push({
           player,
           coordinates: offsetCoords
@@ -59,7 +69,7 @@ export function calculatePlayerCoordinates(
       }
     }
   }
-  
+
   return result;
 }
 

@@ -77,6 +77,8 @@ export interface LineupConfig {
   awayTeamColor?: string;
   fontSize?: number;
   playerCircleSize?: number;
+  interactive?: boolean;
+  onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void;
 }
 
 export interface FieldCoordinates {
@@ -86,4 +88,13 @@ export interface FieldCoordinates {
 
 export type PositionCoordinates = {
   [key in Position]: FieldCoordinates;
-}; 
+};
+
+export interface CustomPlayerCoordinate {
+  playerId: number;
+  team: Team;
+  x: number;
+  y: number;
+}
+
+export type CustomCoordinatesMap = Map<string, FieldCoordinates>; 

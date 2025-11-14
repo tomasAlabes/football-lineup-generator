@@ -1,4 +1,4 @@
-import type { LineupData, LineupConfig, SubstitutesConfig } from '../types.js';
+import type { LineupData, LineupConfig, SubstitutesConfig, CustomCoordinatesMap } from '../types.js';
 import { Position } from '../types.js';
 import { drawField } from './drawField.js';
 import { drawTeamLabel } from './drawTeamLabel.js';
@@ -12,8 +12,13 @@ import { drawSubstitutesList } from './drawSubstitutesList.js';
 export function renderFullPitch(
   ctx: CanvasRenderingContext2D,
   lineupData: LineupData,
-  config: Required<Omit<LineupConfig, 'showSubstitutes'>> & { showSubstitutes: SubstitutesConfig }
-): void {
+  config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove'>> & {
+    showSubstitutes: SubstitutesConfig;
+    interactive?: boolean;
+    onPlayerMove?: (playerId: number, team: any, x: number, y: number) => void;
+  },
+  customCoordinates?: CustomCoordinatesMap
+): any[] {
   // Draw field
   drawField(
     ctx,
@@ -54,7 +59,8 @@ export function renderFullPitch(
     0,
     false,
     true,
-    -20 // Move home team left by 20px
+    -20, // Move home team left by 20px
+    customCoordinates
   );
 
   // Calculate coordinates for away team players (exclude substitutes)
@@ -68,7 +74,8 @@ export function renderFullPitch(
     0,
     false,
     false,
-    -20 // This becomes +20px after mirroring, moving away team right
+    -20, // This becomes +20px after mirroring, moving away team right
+    customCoordinates
   );
 
   // Create mirrored coordinates for away team
@@ -136,4 +143,10 @@ export function renderFullPitch(
       config.showSubstitutes.position
     );
   }
+
+  // Return all player coordinates for interactive controller
+  return [
+    ...homePlayerCoords.map(pc => ({ ...pc, isHomeTeam: true })),
+    ...awayPlayerCoordsWithMirroring.map(pc => ({ ...pc, isHomeTeam: false }))
+  ];
 } 

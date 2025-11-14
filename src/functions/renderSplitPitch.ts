@@ -1,4 +1,4 @@
-import type { LineupData, LineupConfig, SubstitutesConfig } from '../types.js';
+import type { LineupData, LineupConfig, SubstitutesConfig, CustomCoordinatesMap } from '../types.js';
 import { Position } from '../types.js';
 import { drawFieldRotated90CCW } from './drawFieldRotated.js';
 import { drawTeamLabelRotated90CCW } from './drawTeamLabelRotated.js';
@@ -12,8 +12,13 @@ import { drawSubstitutesSplit } from './drawSubstitutesSplit.js';
 export function renderSplitPitch(
   ctx: CanvasRenderingContext2D,
   lineupData: LineupData,
-  config: Required<Omit<LineupConfig, 'showSubstitutes'>> & { showSubstitutes: SubstitutesConfig }
-): void {
+  config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove'>> & {
+    showSubstitutes: SubstitutesConfig;
+    interactive?: boolean;
+    onPlayerMove?: (playerId: number, team: any, x: number, y: number) => void;
+  },
+  customCoordinates?: CustomCoordinatesMap
+): any[] {
   const gap = 60; // Gap between the two separate fields
 
   // Draw FIRST ROTATED FIELD for home team (left side)
@@ -69,7 +74,9 @@ export function renderSplitPitch(
     config.layoutType,
     0,
     false,
-    true
+    true,
+    0,
+    customCoordinates
   );
 
   // Calculate coordinates for away team players (second field, exclude substitutes)
@@ -81,7 +88,9 @@ export function renderSplitPitch(
     config.layoutType,
     0, // No offset since we'll handle positioning with rotation
     false,
-    true
+    true,
+    0,
+    customCoordinates
   );
 
   // Rotate coordinates for both teams
@@ -158,4 +167,10 @@ export function renderSplitPitch(
       config.fontSize
     );
   }
+
+  // Return all player coordinates for interactive controller
+  return [
+    ...homePlayerCoords.map(pc => ({ ...pc, isHomeTeam: true })),
+    ...awayPlayerCoords.map(pc => ({ ...pc, isHomeTeam: false }))
+  ];
 } 

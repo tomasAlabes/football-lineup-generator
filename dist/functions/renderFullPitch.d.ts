@@ -1,4 +1,6 @@
-import type { LineupData, LineupConfig, SubstitutesConfig } from '../types.js';
-export declare function renderFullPitch(ctx: CanvasRenderingContext2D, lineupData: LineupData, config: Required<Omit<LineupConfig, 'showSubstitutes'>> & {
+import type { LineupData, LineupConfig, SubstitutesConfig, CustomCoordinatesMap } from '../types.js';
+export declare function renderFullPitch(ctx: CanvasRenderingContext2D, lineupData: LineupData, config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove'>> & {
     showSubstitutes: SubstitutesConfig;
-}): void;
+    interactive?: boolean;
+    onPlayerMove?: (playerId: number, team: any, x: number, y: number) => void;
+}, customCoordinates?: CustomCoordinatesMap): any[];
