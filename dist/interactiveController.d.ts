@@ -1,4 +1,4 @@
-import type { LineupData, LineupConfig, PlayerPositioning, FieldCoordinates, Team, CustomCoordinatesMap } from './types.js';
+import type { LineupData, LineupConfig, PlayerPositioning, FieldCoordinates, Team, CustomCoordinatesMap, BallConfig } from './types.js';
 interface PlayerWithCoordinates {
     player: PlayerPositioning;
     coordinates: FieldCoordinates;
@@ -10,17 +10,21 @@ export declare class InteractiveController {
     private playerCoordinates;
     private customCoordinates;
     private dragState;
+    private ballDragState;
+    private ballPosition;
     private config;
     private renderCallback;
     private isDragging;
     private canvasTranslateX;
     private canvasTranslateY;
-    constructor(canvas: HTMLCanvasElement, config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange'>> & {
+    constructor(canvas: HTMLCanvasElement, config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange' | 'ball' | 'onBallMove'>> & {
         interactive: boolean;
         onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void;
         recording?: boolean;
         recordingOptions?: any;
         onRecordingStateChange?: any;
+        ball?: boolean | BallConfig;
+        onBallMove?: (x: number, y: number) => void;
     }, renderCallback: () => void, translateX?: number, translateY?: number);
     private attachEventListeners;
     detachEventListeners(): void;
@@ -29,8 +33,11 @@ export declare class InteractiveController {
     getCustomCoordinates(): CustomCoordinatesMap;
     setCustomCoordinate(playerId: number, team: Team, coordinates: FieldCoordinates): void;
     clearCustomCoordinates(): void;
+    getBallPosition(): FieldCoordinates | null;
+    setBallPosition(coordinates: FieldCoordinates | null): void;
     private getCanvasCoordinates;
     private findPlayerAtPosition;
+    private isBallAtPosition;
     private handleMouseDown;
     private handleMouseMove;
     private handleMouseUp;

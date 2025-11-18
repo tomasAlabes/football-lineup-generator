@@ -4,7 +4,8 @@ import type {
   PlayerPositioning,
   FieldCoordinates,
   Team,
-  CustomCoordinatesMap
+  CustomCoordinatesMap,
+  BallConfig
 } from './types.js';
 import { Position } from './types.js';
 
@@ -21,18 +22,28 @@ interface DragState {
   offsetY: number;
 }
 
+interface BallDragState {
+  isBall: true;
+  offsetX: number;
+  offsetY: number;
+}
+
 export class InteractiveController {
   private canvas: HTMLCanvasElement;
   private lineupData: LineupData | null = null;
   private playerCoordinates: PlayerWithCoordinates[] = [];
   private customCoordinates: CustomCoordinatesMap = new Map();
   private dragState: DragState | null = null;
-  private config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange'>> & {
+  private ballDragState: BallDragState | null = null;
+  private ballPosition: FieldCoordinates | null = null;
+  private config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange' | 'ball' | 'onBallMove'>> & {
     interactive: boolean;
     onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void;
     recording?: boolean;
     recordingOptions?: any;
     onRecordingStateChange?: any;
+    ball?: boolean | BallConfig;
+    onBallMove?: (x: number, y: number) => void;
   };
   private renderCallback: () => void;
   private isDragging = false;
@@ -41,12 +52,14 @@ export class InteractiveController {
 
   constructor(
     canvas: HTMLCanvasElement,
-    config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange'>> & {
+    config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange' | 'ball' | 'onBallMove'>> & {
       interactive: boolean;
       onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void;
       recording?: boolean;
       recordingOptions?: any;
       onRecordingStateChange?: any;
+      ball?: boolean | BallConfig;
+      onBallMove?: (x: number, y: number) => void;
     },
     renderCallback: () => void,
     translateX: number = 0,
@@ -60,6 +73,17 @@ export class InteractiveController {
 
     if (this.config.interactive) {
       this.attachEventListeners();
+    }
+
+    // Initialize ball position if ball is enabled
+    if (this.config.ball) {
+      const ballConfig: BallConfig = typeof this.config.ball === 'boolean'
+        ? { enabled: this.config.ball }
+        : this.config.ball;
+      this.ballPosition = {
+        x: ballConfig.initialX ?? this.config.width / 2,
+        y: ballConfig.initialY ?? this.config.height / 2
+      };
     }
   }
 
@@ -113,6 +137,14 @@ export class InteractiveController {
     this.customCoordinates.clear();
   }
 
+  public getBallPosition(): FieldCoordinates | null {
+    return this.ballPosition;
+  }
+
+  public setBallPosition(coordinates: FieldCoordinates | null): void {
+    this.ballPosition = coordinates;
+  }
+
   private getCanvasCoordinates(clientX: number, clientY: number): FieldCoordinates {
     const rect = this.canvas.getBoundingClientRect();
     const scaleX = this.canvas.width / rect.width;
@@ -148,10 +180,41 @@ export class InteractiveController {
     return null;
   }
 
+  private isBallAtPosition(x: number, y: number): boolean {
+    if (!this.config.ball || !this.ballPosition) {
+      return false;
+    }
+
+    const ballConfig: BallConfig = typeof this.config.ball === 'boolean'
+      ? { enabled: this.config.ball }
+      : this.config.ball;
+    const ballSize = ballConfig.size ?? 10;
+
+    const dx = x - this.ballPosition.x;
+    const dy = y - this.ballPosition.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    return distance <= ballSize;
+  }
+
   private handleMouseDown = (event: MouseEvent): void => {
     const coords = this.getCanvasCoordinates(event.clientX, event.clientY);
-    const player = this.findPlayerAtPosition(coords.x, coords.y);
 
+    // Check for ball first (ball has priority over players)
+    if (this.isBallAtPosition(coords.x, coords.y) && this.ballPosition) {
+      this.ballDragState = {
+        isBall: true,
+        offsetX: coords.x - this.ballPosition.x,
+        offsetY: coords.y - this.ballPosition.y,
+      };
+      this.isDragging = true;
+      this.canvas.style.cursor = 'grabbing';
+      event.preventDefault();
+      return;
+    }
+
+    // Check for players
+    const player = this.findPlayerAtPosition(coords.x, coords.y);
     if (player) {
       this.dragState = {
         player: player.player,
@@ -168,9 +231,19 @@ export class InteractiveController {
   private handleMouseMove = (event: MouseEvent): void => {
     const coords = this.getCanvasCoordinates(event.clientX, event.clientY);
 
-    if (this.isDragging && this.dragState) {
-      // Update custom coordinates - store directly in canvas space
-      // Custom coordinates are applied AFTER all transformations in render functions
+    if (this.isDragging && this.ballDragState) {
+      // Dragging the ball
+      const newX = coords.x - this.ballDragState.offsetX;
+      const newY = coords.y - this.ballDragState.offsetY;
+
+      this.ballPosition = { x: newX, y: newY };
+
+      // Trigger re-render
+      this.renderCallback();
+
+      event.preventDefault();
+    } else if (this.isDragging && this.dragState) {
+      // Dragging a player
       const newX = coords.x - this.dragState.offsetX;
       const newY = coords.y - this.dragState.offsetY;
 
@@ -182,14 +255,34 @@ export class InteractiveController {
 
       event.preventDefault();
     } else {
-      // Update cursor based on whether we're hovering over a player
+      // Update cursor based on whether we're hovering over a player or ball
+      const isBall = this.isBallAtPosition(coords.x, coords.y);
       const player = this.findPlayerAtPosition(coords.x, coords.y);
-      this.canvas.style.cursor = player ? 'grab' : 'default';
+      this.canvas.style.cursor = (isBall || player) ? 'grab' : 'default';
     }
   };
 
   private handleMouseUp = (event: MouseEvent): void => {
-    if (this.isDragging && this.dragState) {
+    if (this.isDragging && this.ballDragState) {
+      // Ball drag ended
+      const coords = this.getCanvasCoordinates(event.clientX, event.clientY);
+      const newX = coords.x - this.ballDragState.offsetX;
+      const newY = coords.y - this.ballDragState.offsetY;
+
+      // Call the onBallMove callback if provided
+      if (this.config.onBallMove) {
+        this.config.onBallMove(newX, newY);
+      }
+
+      this.isDragging = false;
+      this.ballDragState = null;
+
+      // Update cursor
+      const isBall = this.isBallAtPosition(coords.x, coords.y);
+      const player = this.findPlayerAtPosition(coords.x, coords.y);
+      this.canvas.style.cursor = (isBall || player) ? 'grab' : 'default';
+    } else if (this.isDragging && this.dragState) {
+      // Player drag ended
       const coords = this.getCanvasCoordinates(event.clientX, event.clientY);
       const newX = coords.x - this.dragState.offsetX;
       const newY = coords.y - this.dragState.offsetY;
@@ -208,8 +301,9 @@ export class InteractiveController {
       this.dragState = null;
 
       // Update cursor
+      const isBall = this.isBallAtPosition(coords.x, coords.y);
       const player = this.findPlayerAtPosition(coords.x, coords.y);
-      this.canvas.style.cursor = player ? 'grab' : 'default';
+      this.canvas.style.cursor = (isBall || player) ? 'grab' : 'default';
     }
   };
 
@@ -217,8 +311,21 @@ export class InteractiveController {
     if (event.touches.length === 1) {
       const touch = event.touches[0];
       const coords = this.getCanvasCoordinates(touch.clientX, touch.clientY);
-      const player = this.findPlayerAtPosition(coords.x, coords.y);
 
+      // Check for ball first
+      if (this.isBallAtPosition(coords.x, coords.y) && this.ballPosition) {
+        this.ballDragState = {
+          isBall: true,
+          offsetX: coords.x - this.ballPosition.x,
+          offsetY: coords.y - this.ballPosition.y,
+        };
+        this.isDragging = true;
+        event.preventDefault();
+        return;
+      }
+
+      // Check for players
+      const player = this.findPlayerAtPosition(coords.x, coords.y);
       if (player) {
         this.dragState = {
           player: player.player,
@@ -233,11 +340,26 @@ export class InteractiveController {
   };
 
   private handleTouchMove = (event: TouchEvent): void => {
-    if (this.isDragging && this.dragState && event.touches.length === 1) {
-      const touch = event.touches[0];
-      const coords = this.getCanvasCoordinates(touch.clientX, touch.clientY);
+    if (event.touches.length !== 1) {
+      return;
+    }
 
-      // Update custom coordinates - store directly in canvas space
+    const touch = event.touches[0];
+    const coords = this.getCanvasCoordinates(touch.clientX, touch.clientY);
+
+    if (this.isDragging && this.ballDragState) {
+      // Dragging the ball
+      const newX = coords.x - this.ballDragState.offsetX;
+      const newY = coords.y - this.ballDragState.offsetY;
+
+      this.ballPosition = { x: newX, y: newY };
+
+      // Trigger re-render
+      this.renderCallback();
+
+      event.preventDefault();
+    } else if (this.isDragging && this.dragState) {
+      // Dragging a player
       const newX = coords.x - this.dragState.offsetX;
       const newY = coords.y - this.dragState.offsetY;
 
@@ -252,8 +374,16 @@ export class InteractiveController {
   };
 
   private handleTouchEnd = (event: TouchEvent): void => {
-    if (this.isDragging && this.dragState) {
-      // Use the last known position from customCoordinates
+    if (this.isDragging && this.ballDragState) {
+      // Ball drag ended
+      if (this.ballPosition && this.config.onBallMove) {
+        this.config.onBallMove(this.ballPosition.x, this.ballPosition.y);
+      }
+
+      this.isDragging = false;
+      this.ballDragState = null;
+    } else if (this.isDragging && this.dragState) {
+      // Player drag ended - use the last known position from customCoordinates
       const key = `${this.dragState.player.team}-${this.dragState.player.player.id}`;
       const coords = this.customCoordinates.get(key);
 

@@ -1,10 +1,11 @@
-import type { LineupData, LineupConfig, SubstitutesConfig, CustomCoordinatesMap } from './types.js';
+import type { LineupData, LineupConfig, SubstitutesConfig, CustomCoordinatesMap, BallConfig } from './types.js';
 import { LayoutType, SubstitutesPosition } from './types.js';
 
 // Import all the extracted functions
 import { renderFullPitch } from './functions/renderFullPitch.js';
 import { renderHalfPitch } from './functions/renderHalfPitch.js';
 import { renderSplitPitch } from './functions/renderSplitPitch.js';
+import { drawBall } from './functions/drawBall.js';
 
 // Import interactive controller
 import { InteractiveController } from './interactiveController.js';
@@ -15,13 +16,15 @@ import { RecordingController, type RecordingState } from './recordingController.
 export class FootballLineupRenderer {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange'>> & {
+  private config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange' | 'ball' | 'onBallMove'>> & {
     showSubstitutes: SubstitutesConfig;
     interactive: boolean;
     onPlayerMove?: (playerId: number, team: any, x: number, y: number) => void;
     recording: boolean;
     recordingOptions?: any;
     onRecordingStateChange?: (state: RecordingState) => void;
+    ball: BallConfig;
+    onBallMove?: (x: number, y: number) => void;
   };
   private interactiveController: InteractiveController | null = null;
   private recordingController: RecordingController | null = null;
@@ -51,6 +54,30 @@ export class FootballLineupRenderer {
       };
     }
 
+    // Normalize ball config
+    let ballConfig: BallConfig;
+    if (typeof config.ball === 'boolean') {
+      ballConfig = {
+        enabled: config.ball,
+        color: '#FFFFFF',
+        size: 10,
+      };
+    } else if (config.ball) {
+      ballConfig = {
+        enabled: true,
+        color: config.ball.color ?? '#FFFFFF',
+        size: config.ball.size ?? 10,
+        initialX: config.ball.initialX,
+        initialY: config.ball.initialY,
+      };
+    } else {
+      ballConfig = {
+        enabled: false,
+        color: '#FFFFFF',
+        size: 10,
+      };
+    }
+
     // Default configuration with smaller player circles
     this.config = {
       width: config.width ?? 800,
@@ -70,6 +97,8 @@ export class FootballLineupRenderer {
       recording: config.recording ?? false,
       recordingOptions: config.recordingOptions,
       onRecordingStateChange: config.onRecordingStateChange,
+      ball: ballConfig,
+      onBallMove: config.onBallMove,
     };
 
     // Adjust canvas size for split pitch layout
@@ -143,14 +172,28 @@ export class FootballLineupRenderer {
 
     switch (this.config.layoutType) {
       case LayoutType.FULL_PITCH:
-        playerCoordinates = renderFullPitch(this.ctx, lineupData, this.config, customCoordinates);
+        playerCoordinates = renderFullPitch(this.ctx, lineupData, this.config as any, customCoordinates);
         break;
       case LayoutType.HALF_PITCH:
-        playerCoordinates = renderHalfPitch(this.ctx, lineupData, this.config, customCoordinates);
+        playerCoordinates = renderHalfPitch(this.ctx, lineupData, this.config as any, customCoordinates);
         break;
       case LayoutType.SPLIT_PITCH:
-        playerCoordinates = renderSplitPitch(this.ctx, lineupData, this.config, customCoordinates);
+        playerCoordinates = renderSplitPitch(this.ctx, lineupData, this.config as any, customCoordinates);
         break;
+    }
+
+    // Draw ball if enabled
+    if (this.config.ball.enabled) {
+      const ballPosition = this.interactiveController?.getBallPosition();
+      if (ballPosition) {
+        drawBall(
+          this.ctx,
+          ballPosition.x,
+          ballPosition.y,
+          this.config.ball.size,
+          this.config.ball.color
+        );
+      }
     }
 
     // Update interactive controller with player coordinates

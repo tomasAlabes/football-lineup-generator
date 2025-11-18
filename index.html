@@ -237,6 +237,13 @@
                 </label>
             </div>
 
+            <div style="margin-top: 10px;">
+                <label>
+                    <input type="checkbox" id="showBall" />
+                    <strong>Show Ball</strong> - Add a draggable ball to explain movements
+                </label>
+            </div>
+
             <div id="recording-controls" style="margin-top: 10px; display: none;">
                 <h4>Recording Controls:</h4>
                 <button id="startRecordingBtn" style="background: #f44336;">⏺ Start Recording</button>
@@ -504,6 +511,7 @@
             const layoutType = document.getElementById('layoutType').value;
             const interactiveMode = document.getElementById('interactiveMode').checked;
             const recordingMode = document.getElementById('recordingMode').checked;
+            const showBall = document.getElementById('showBall').checked;
 
             const formation = formations[currentFormation];
             
@@ -564,6 +572,10 @@
                 },
                 onRecordingStateChange: recordingMode ? (state) => {
                     updateRecordingStatus(state);
+                } : undefined,
+                ball: showBall,
+                onBallMove: showBall ? (x, y) => {
+                    console.log(`Ball moved to (${Math.round(x)}, ${Math.round(y)})`);
                 } : undefined
             };
 
@@ -708,8 +720,9 @@
             // Auto-generate lineup when other controls change
             const interactiveModeCheckbox = document.getElementById('interactiveMode');
             const recordingModeCheckbox = document.getElementById('recordingMode');
+            const showBallCheckbox = document.getElementById('showBall');
 
-            [canvasSizeSelect, fieldColorInput, homeColorInput, awayColorInput, homeTeamInput, awayTeamInput, interactiveModeCheckbox, recordingModeCheckbox].forEach(control => {
+            [canvasSizeSelect, fieldColorInput, homeColorInput, awayColorInput, homeTeamInput, awayTeamInput, interactiveModeCheckbox, recordingModeCheckbox, showBallCheckbox].forEach(control => {
                 control.addEventListener('change', function() {
                     generateLineupExample();
                 });

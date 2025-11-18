@@ -60,6 +60,13 @@ export interface RecordingOptions {
     fps?: number;
     videoBitsPerSecond?: number;
 }
+export interface BallConfig {
+    enabled: boolean;
+    color?: string;
+    size?: number;
+    initialX?: number;
+    initialY?: number;
+}
 export interface LineupConfig {
     width?: number;
     height?: number;
@@ -78,6 +85,8 @@ export interface LineupConfig {
     recording?: boolean;
     recordingOptions?: RecordingOptions;
     onRecordingStateChange?: (state: 'idle' | 'recording' | 'paused' | 'stopped') => void;
+    ball?: boolean | BallConfig;
+    onBallMove?: (x: number, y: number) => void;
 }
 export interface FieldCoordinates {
     x: number;
