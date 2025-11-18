@@ -177,7 +177,7 @@ export class FootballLineupRenderer {
       // Initialize recording UI if enabled
       if (uiEnabled) {
         const uiConfig = typeof config.recordingUI === 'object' ? config.recordingUI : {};
-        this.recordingUI = new RecordingUI(uiConfig);
+        this.recordingUI = new RecordingUI(this.canvas, uiConfig);
 
         // Set up UI callbacks
         this.recordingUI.setCallbacks({

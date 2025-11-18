@@ -79,7 +79,6 @@ export interface BallConfig {
 
 export interface RecordingUIConfig {
   enabled?: boolean;
-  container?: HTMLElement;
   position?: 'top' | 'bottom' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   theme?: 'light' | 'dark';
 }

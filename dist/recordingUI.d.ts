@@ -9,13 +9,15 @@ export declare class RecordingUI {
     private stopBtn;
     private downloadBtn;
     private statusIndicator;
+    private canvas;
     private config;
     private onStart?;
     private onPause?;
     private onResume?;
     private onStop?;
     private onDownload?;
-    constructor(config?: RecordingUIConfig);
+    constructor(canvas: HTMLCanvasElement, config?: RecordingUIConfig);
+    private ensureCanvasParentPositioning;
     private createContainer;
     private getPositionStyles;
     private createControlsContainer;

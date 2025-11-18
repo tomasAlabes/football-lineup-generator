@@ -1,7 +1,7 @@
 export class RecordingUI {
-    constructor(config = {}) {
+    constructor(canvas, config = {}) {
+        this.canvas = canvas;
         this.config = {
-            container: config.container ?? document.body,
             position: config.position ?? 'top-right',
             theme: config.theme ?? 'light'
         };
@@ -22,16 +22,34 @@ export class RecordingUI {
         this.controlsContainer.appendChild(this.downloadBtn);
         this.controlsContainer.appendChild(this.statusIndicator);
         this.uiContainer.appendChild(this.controlsContainer);
-        this.config.container.appendChild(this.uiContainer);
+        // Ensure canvas parent has relative positioning
+        this.ensureCanvasParentPositioning();
+        // Insert UI into canvas parent
+        const canvasParent = this.canvas.parentElement;
+        if (canvasParent) {
+            canvasParent.appendChild(this.uiContainer);
+        }
+        else {
+            document.body.appendChild(this.uiContainer);
+        }
         // Set initial button states
         this.updateButtonStates('idle');
         // Bind event listeners
         this.attachEventListeners();
     }
+    ensureCanvasParentPositioning() {
+        const canvasParent = this.canvas.parentElement;
+        if (canvasParent) {
+            const currentPosition = window.getComputedStyle(canvasParent).position;
+            if (currentPosition === 'static') {
+                canvasParent.style.position = 'relative';
+            }
+        }
+    }
     createContainer() {
         const container = document.createElement('div');
         container.style.cssText = `
-      position: fixed;
+      position: absolute;
       ${this.getPositionStyles()}
       z-index: 10000;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -41,21 +59,23 @@ export class RecordingUI {
         return container;
     }
     getPositionStyles() {
+        // Position controls just outside the canvas edges with minimal gap
+        const gap = '8px';
         switch (this.config.position) {
             case 'top':
-                return 'top: 10px; left: 50%; transform: translateX(-50%);';
+                return `top: ${gap}; left: 50%; transform: translateX(-50%);`;
             case 'bottom':
-                return 'bottom: 10px; left: 50%; transform: translateX(-50%);';
+                return `bottom: ${gap}; left: 50%; transform: translateX(-50%);`;
             case 'top-left':
-                return 'top: 10px; left: 10px;';
+                return `top: ${gap}; left: ${gap};`;
             case 'top-right':
-                return 'top: 10px; right: 10px;';
+                return `top: ${gap}; right: ${gap};`;
             case 'bottom-left':
-                return 'bottom: 10px; left: 10px;';
+                return `bottom: ${gap}; left: ${gap};`;
             case 'bottom-right':
-                return 'bottom: 10px; right: 10px;';
+                return `bottom: ${gap}; right: ${gap};`;
             default:
-                return 'top: 10px; right: 10px;';
+                return `top: ${gap}; right: ${gap};`;
         }
     }
     createControlsContainer() {
