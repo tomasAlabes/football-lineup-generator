@@ -91,19 +91,31 @@ function getFullPitchBaseCoords(
 
   const baseCoords = {
     [Position.GOALKEEPER]: { x: fieldMargin + fieldWidth * 0.08, y: height / 2 },
-    [Position.LEFT_BACK]: { x: fieldMargin + fieldWidth * 0.27, y: height * 0.2 },
+    // Defenders
+    [Position.LEFT_BACK]: { x: fieldMargin + fieldWidth * 0.27, y: height * 0.15 },
+    [Position.LEFT_CENTER_BACK]: { x: fieldMargin + fieldWidth * 0.25, y: height * 0.35 },
     [Position.CENTER_BACK]: { x: fieldMargin + fieldWidth * 0.25, y: height * 0.5 },
-    [Position.RIGHT_BACK]: { x: fieldMargin + fieldWidth * 0.27, y: height * 0.8 },
+    [Position.RIGHT_CENTER_BACK]: { x: fieldMargin + fieldWidth * 0.25, y: height * 0.65 },
+    [Position.RIGHT_BACK]: { x: fieldMargin + fieldWidth * 0.27, y: height * 0.85 },
+    // Wing Backs
+    [Position.LEFT_WING_BACK]: { x: fieldMargin + fieldWidth * 0.35, y: height * 0.1 },
+    [Position.RIGHT_WING_BACK]: { x: fieldMargin + fieldWidth * 0.35, y: height * 0.9 },
+    // Midfielders
     [Position.DEFENSIVE_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.45, y: height / 2 },
     [Position.LEFT_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.6, y: height * 0.2 },
     [Position.CENTER_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.55, y: height / 2 },
     [Position.RIGHT_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.6, y: height * 0.8 },
     [Position.ATTACKING_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.67, y: height / 2 },
-    [Position.LEFT_WINGER]: { x: fieldMargin + fieldWidth * 0.75, y: height * 0.2 },
-    [Position.RIGHT_WINGER]: { x: fieldMargin + fieldWidth * 0.75, y: height * 0.8 },
+    // Wingers
+    [Position.LEFT_WINGER]: { x: fieldMargin + fieldWidth * 0.75, y: height * 0.15 },
+    [Position.RIGHT_WINGER]: { x: fieldMargin + fieldWidth * 0.75, y: height * 0.85 },
+    // Forwards
+    [Position.SECOND_STRIKER]: { x: fieldMargin + fieldWidth * 0.8, y: height / 2 },
     [Position.LEFT_FORWARD]: { x: fieldMargin + fieldWidth * 0.88, y: height * 0.35 },
+    [Position.STRIKER]: { x: fieldMargin + fieldWidth * 0.85, y: height / 2 },
     [Position.CENTER_FORWARD]: { x: fieldMargin + fieldWidth * 0.85, y: height / 2 },
     [Position.RIGHT_FORWARD]: { x: fieldMargin + fieldWidth * 0.85, y: height * 0.65 },
+    // Substitutes
     [Position.SUBSTITUTE]: { x: actualWidth + 20, y: height / 2 },
   };
 
@@ -127,19 +139,31 @@ function getHalfPitchBaseCoords(
 
   const baseCoords: Record<Position, FieldCoordinates> = {
     [Position.GOALKEEPER]: { x: baseX + halfWidth * 0.15, y: height / 2 },
-    [Position.LEFT_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.15 },
+    // Defenders
+    [Position.LEFT_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.12 },
+    [Position.LEFT_CENTER_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.35 },
     [Position.CENTER_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.5 },
-    [Position.RIGHT_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.85 },
+    [Position.RIGHT_CENTER_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.65 },
+    [Position.RIGHT_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.88 },
+    // Wing Backs
+    [Position.LEFT_WING_BACK]: { x: baseX + halfWidth * 0.5, y: height * 0.08 },
+    [Position.RIGHT_WING_BACK]: { x: baseX + halfWidth * 0.5, y: height * 0.92 },
+    // Midfielders
     [Position.DEFENSIVE_MIDFIELDER]: { x: baseX + halfWidth * 0.6, y: height * 0.35 },
     [Position.LEFT_MIDFIELDER]: { x: baseX + halfWidth * 0.75, y: height * 0.2 },
     [Position.CENTER_MIDFIELDER]: { x: baseX + halfWidth * 0.6, y: height * 0.65 },
     [Position.RIGHT_MIDFIELDER]: { x: baseX + halfWidth * 0.75, y: height * 0.8 },
     [Position.ATTACKING_MIDFIELDER]: { x: baseX + halfWidth * 0.85, y: height * 0.5 },
+    // Wingers
     [Position.LEFT_WINGER]: { x: baseX + halfWidth * 0.9, y: height * 0.15 },
     [Position.RIGHT_WINGER]: { x: baseX + halfWidth * 0.9, y: height * 0.85 },
+    // Forwards
+    [Position.SECOND_STRIKER]: { x: baseX + halfWidth * 0.85, y: height * 0.5 },
     [Position.LEFT_FORWARD]: { x: baseX + halfWidth * 0.95, y: height * 0.35 },
+    [Position.STRIKER]: { x: baseX + halfWidth * 0.95, y: height * 0.5 },
     [Position.CENTER_FORWARD]: { x: baseX + halfWidth * 0.95, y: height * 0.5 },
     [Position.RIGHT_FORWARD]: { x: baseX + halfWidth * 0.95, y: height * 0.65 },
+    // Substitutes
     [Position.SUBSTITUTE]: { x: width + 20, y: height / 2 },
   };
 
@@ -211,9 +235,13 @@ function isVerticalPosition(position: Position): boolean {
   // Positions that should be offset vertically when there are multiple players
   return [
     Position.CENTER_BACK,
+    Position.LEFT_CENTER_BACK,
+    Position.RIGHT_CENTER_BACK,
     Position.DEFENSIVE_MIDFIELDER,
     Position.CENTER_MIDFIELDER,
     Position.ATTACKING_MIDFIELDER,
-    Position.CENTER_FORWARD
+    Position.CENTER_FORWARD,
+    Position.STRIKER,
+    Position.SECOND_STRIKER
   ].includes(position);
 } 

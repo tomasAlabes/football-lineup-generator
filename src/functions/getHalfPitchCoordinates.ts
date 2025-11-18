@@ -11,26 +11,36 @@ export function getHalfPitchCoordinates(width: number, height: number, isHomeTea
   return {
     // Goalkeeper
     [Position.GOALKEEPER]: { x: baseX + halfWidth * 0.15, y: height / 2 },
-    
+
     // Defenders - distributed better vertically
-    [Position.LEFT_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.15 },
+    [Position.LEFT_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.12 },
+    [Position.LEFT_CENTER_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.35 },
     [Position.CENTER_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.5 },
-    [Position.RIGHT_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.85 },
-    
+    [Position.RIGHT_CENTER_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.65 },
+    [Position.RIGHT_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.88 },
+
+    // Wing Backs
+    [Position.LEFT_WING_BACK]: { x: baseX + halfWidth * 0.5, y: height * 0.08 },
+    [Position.RIGHT_WING_BACK]: { x: baseX + halfWidth * 0.5, y: height * 0.92 },
+
     // Midfielders - staggered formation to avoid overlaps
     [Position.DEFENSIVE_MIDFIELDER]: { x: baseX + halfWidth * 0.6, y: height * 0.35 },
     [Position.LEFT_MIDFIELDER]: { x: baseX + halfWidth * 0.75, y: height * 0.2 },
     [Position.CENTER_MIDFIELDER]: { x: baseX + halfWidth * 0.6, y: height * 0.65 },
     [Position.RIGHT_MIDFIELDER]: { x: baseX + halfWidth * 0.75, y: height * 0.8 },
     [Position.ATTACKING_MIDFIELDER]: { x: baseX + halfWidth * 0.85, y: height * 0.5 },
-    
+
     // Wingers and Forwards - better distribution
     [Position.LEFT_WINGER]: { x: baseX + halfWidth * 0.9, y: height * 0.15 },
     [Position.RIGHT_WINGER]: { x: baseX + halfWidth * 0.9, y: height * 0.85 },
+
+    // Forwards
+    [Position.SECOND_STRIKER]: { x: baseX + halfWidth * 0.85, y: height * 0.5 },
     [Position.LEFT_FORWARD]: { x: baseX + halfWidth * 0.95, y: height * 0.35 },
+    [Position.STRIKER]: { x: baseX + halfWidth * 0.95, y: height * 0.5 },
     [Position.CENTER_FORWARD]: { x: baseX + halfWidth * 0.95, y: height * 0.5 },
     [Position.RIGHT_FORWARD]: { x: baseX + halfWidth * 0.95, y: height * 0.65 },
-    
+
     // Substitutes
     [Position.SUBSTITUTE]: { x: width + 20, y: height / 2 },
   };

@@ -5,19 +5,30 @@ export enum Team {
 
 export enum Position {
   GOALKEEPER = "goalkeeper",
+  // Defenders
   CENTER_BACK = "center_back",
+  LEFT_CENTER_BACK = "left_center_back",
+  RIGHT_CENTER_BACK = "right_center_back",
   LEFT_BACK = "left_back",
   RIGHT_BACK = "right_back",
+  LEFT_WING_BACK = "left_wing_back",
+  RIGHT_WING_BACK = "right_wing_back",
+  // Midfielders
   DEFENSIVE_MIDFIELDER = "defensive_midfielder",
   CENTER_MIDFIELDER = "center_midfielder",
   ATTACKING_MIDFIELDER = "attacking_midfielder",
   LEFT_MIDFIELDER = "left_midfielder",
   RIGHT_MIDFIELDER = "right_midfielder",
+  // Wingers
   LEFT_WINGER = "left_winger",
   RIGHT_WINGER = "right_winger",
+  // Forwards
+  STRIKER = "striker",
+  SECOND_STRIKER = "second_striker",
   CENTER_FORWARD = "center_forward",
   LEFT_FORWARD = "left_forward",
   RIGHT_FORWARD = "right_forward",
+  // Substitutes
   SUBSTITUTE = "substitute",
 }
 
