@@ -9,15 +9,22 @@ import { renderSplitPitch } from './functions/renderSplitPitch.js';
 // Import interactive controller
 import { InteractiveController } from './interactiveController.js';
 
+// Import recording controller
+import { RecordingController, type RecordingState } from './recordingController.js';
+
 export class FootballLineupRenderer {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove'>> & {
+  private config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange'>> & {
     showSubstitutes: SubstitutesConfig;
     interactive: boolean;
     onPlayerMove?: (playerId: number, team: any, x: number, y: number) => void;
+    recording: boolean;
+    recordingOptions?: any;
+    onRecordingStateChange?: (state: RecordingState) => void;
   };
   private interactiveController: InteractiveController | null = null;
+  private recordingController: RecordingController | null = null;
   private lineupData: LineupData | null = null;
 
   constructor(canvas: HTMLCanvasElement, config: LineupConfig = {}) {
@@ -60,6 +67,9 @@ export class FootballLineupRenderer {
       playerCircleSize: config.playerCircleSize ?? 16, // Reduced from 20 to 16
       interactive: config.interactive ?? false,
       onPlayerMove: config.onPlayerMove,
+      recording: config.recording ?? false,
+      recordingOptions: config.recordingOptions,
+      onRecordingStateChange: config.onRecordingStateChange,
     };
 
     // Adjust canvas size for split pitch layout
@@ -105,6 +115,15 @@ export class FootballLineupRenderer {
         translateY
       );
     }
+
+    // Initialize recording controller if recording mode is enabled
+    if (this.config.recording) {
+      this.recordingController = new RecordingController(
+        this.canvas,
+        this.config.recordingOptions,
+        this.config.onRecordingStateChange
+      );
+    }
   }
 
   public render(lineupData: LineupData): void {
@@ -145,8 +164,12 @@ export class FootballLineupRenderer {
     if (this.interactiveController) {
       this.interactiveController.detachEventListeners();
     }
+    if (this.recordingController) {
+      this.recordingController.destroy();
+    }
   }
 
+  // Interactive mode methods
   public getCustomCoordinates(): CustomCoordinatesMap | undefined {
     return this.interactiveController?.getCustomCoordinates();
   }
@@ -167,5 +190,69 @@ export class FootballLineupRenderer {
         this.render(this.lineupData);
       }
     }
+  }
+
+  // Recording mode methods
+  public startRecording(): void {
+    if (!this.recordingController) {
+      console.warn('Recording mode is not enabled. Enable it by setting recording: true in config.');
+      return;
+    }
+    this.recordingController.startRecording();
+  }
+
+  public pauseRecording(): void {
+    if (!this.recordingController) {
+      console.warn('Recording mode is not enabled.');
+      return;
+    }
+    this.recordingController.pauseRecording();
+  }
+
+  public resumeRecording(): void {
+    if (!this.recordingController) {
+      console.warn('Recording mode is not enabled.');
+      return;
+    }
+    this.recordingController.resumeRecording();
+  }
+
+  public stopRecording(): void {
+    if (!this.recordingController) {
+      console.warn('Recording mode is not enabled.');
+      return;
+    }
+    this.recordingController.stopRecording();
+  }
+
+  public downloadRecording(filename?: string): void {
+    if (!this.recordingController) {
+      console.warn('Recording mode is not enabled.');
+      return;
+    }
+    this.recordingController.downloadRecording(filename);
+  }
+
+  public getRecordingBlob(): Blob | null {
+    if (!this.recordingController) {
+      console.warn('Recording mode is not enabled.');
+      return null;
+    }
+    return this.recordingController.getRecordingBlob();
+  }
+
+  public getRecordingState(): RecordingState | null {
+    if (!this.recordingController) {
+      return null;
+    }
+    return this.recordingController.getState();
+  }
+
+  public clearRecording(): void {
+    if (!this.recordingController) {
+      console.warn('Recording mode is not enabled.');
+      return;
+    }
+    this.recordingController.clearRecording();
   }
 } 

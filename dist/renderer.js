@@ -5,9 +5,12 @@ import { renderHalfPitch } from './functions/renderHalfPitch.js';
 import { renderSplitPitch } from './functions/renderSplitPitch.js';
 // Import interactive controller
 import { InteractiveController } from './interactiveController.js';
+// Import recording controller
+import { RecordingController } from './recordingController.js';
 export class FootballLineupRenderer {
     constructor(canvas, config = {}) {
         this.interactiveController = null;
+        this.recordingController = null;
         this.lineupData = null;
         this.canvas = canvas;
         const context = canvas.getContext('2d');
@@ -48,6 +51,9 @@ export class FootballLineupRenderer {
             playerCircleSize: config.playerCircleSize ?? 16, // Reduced from 20 to 16
             interactive: config.interactive ?? false,
             onPlayerMove: config.onPlayerMove,
+            recording: config.recording ?? false,
+            recordingOptions: config.recordingOptions,
+            onRecordingStateChange: config.onRecordingStateChange,
         };
         // Adjust canvas size for split pitch layout
         if (this.config.layoutType === LayoutType.SPLIT_PITCH) {
@@ -85,6 +91,10 @@ export class FootballLineupRenderer {
             }
             this.interactiveController = new InteractiveController(this.canvas, this.config, () => this.render(this.lineupData), translateX, translateY);
         }
+        // Initialize recording controller if recording mode is enabled
+        if (this.config.recording) {
+            this.recordingController = new RecordingController(this.canvas, this.config.recordingOptions, this.config.onRecordingStateChange);
+        }
     }
     render(lineupData) {
         // Store lineup data for re-rendering
@@ -118,7 +128,11 @@ export class FootballLineupRenderer {
         if (this.interactiveController) {
             this.interactiveController.detachEventListeners();
         }
+        if (this.recordingController) {
+            this.recordingController.destroy();
+        }
     }
+    // Interactive mode methods
     getCustomCoordinates() {
         return this.interactiveController?.getCustomCoordinates();
     }
@@ -137,5 +151,61 @@ export class FootballLineupRenderer {
                 this.render(this.lineupData);
             }
         }
+    }
+    // Recording mode methods
+    startRecording() {
+        if (!this.recordingController) {
+            console.warn('Recording mode is not enabled. Enable it by setting recording: true in config.');
+            return;
+        }
+        this.recordingController.startRecording();
+    }
+    pauseRecording() {
+        if (!this.recordingController) {
+            console.warn('Recording mode is not enabled.');
+            return;
+        }
+        this.recordingController.pauseRecording();
+    }
+    resumeRecording() {
+        if (!this.recordingController) {
+            console.warn('Recording mode is not enabled.');
+            return;
+        }
+        this.recordingController.resumeRecording();
+    }
+    stopRecording() {
+        if (!this.recordingController) {
+            console.warn('Recording mode is not enabled.');
+            return;
+        }
+        this.recordingController.stopRecording();
+    }
+    downloadRecording(filename) {
+        if (!this.recordingController) {
+            console.warn('Recording mode is not enabled.');
+            return;
+        }
+        this.recordingController.downloadRecording(filename);
+    }
+    getRecordingBlob() {
+        if (!this.recordingController) {
+            console.warn('Recording mode is not enabled.');
+            return null;
+        }
+        return this.recordingController.getRecordingBlob();
+    }
+    getRecordingState() {
+        if (!this.recordingController) {
+            return null;
+        }
+        return this.recordingController.getState();
+    }
+    clearRecording() {
+        if (!this.recordingController) {
+            console.warn('Recording mode is not enabled.');
+            return;
+        }
+        this.recordingController.clearRecording();
     }
 }

@@ -64,6 +64,11 @@ export interface SubstitutesConfig {
   position: SubstitutesPosition;
 }
 
+export interface RecordingOptions {
+  fps?: number;
+  videoBitsPerSecond?: number;
+}
+
 export interface LineupConfig {
   width?: number;
   height?: number;
@@ -79,6 +84,9 @@ export interface LineupConfig {
   playerCircleSize?: number;
   interactive?: boolean;
   onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void;
+  recording?: boolean;
+  recordingOptions?: RecordingOptions;
+  onRecordingStateChange?: (state: 'idle' | 'recording' | 'paused' | 'stopped') => void;
 }
 
 export interface FieldCoordinates {

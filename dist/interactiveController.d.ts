@@ -15,9 +15,12 @@ export declare class InteractiveController {
     private isDragging;
     private canvasTranslateX;
     private canvasTranslateY;
-    constructor(canvas: HTMLCanvasElement, config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove'>> & {
+    constructor(canvas: HTMLCanvasElement, config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange'>> & {
         interactive: boolean;
         onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void;
+        recording?: boolean;
+        recordingOptions?: any;
+        onRecordingStateChange?: any;
     }, renderCallback: () => void, translateX?: number, translateY?: number);
     private attachEventListeners;
     detachEventListeners(): void;

@@ -1,6 +1,7 @@
 import { FootballLineupRenderer } from './renderer.js';
-import type { LineupData, LineupConfig, Player, PlayerPositioning, SubstitutesConfig } from './types.js';
+import type { LineupData, LineupConfig, Player, PlayerPositioning, SubstitutesConfig, RecordingOptions } from './types.js';
 import { Team, Position, LayoutType, SubstitutesPosition } from './types.js';
+import { RecordingController, type RecordingState } from './recordingController.js';
 /**
  * Creates a canvas element with a football lineup visualization
  * @param lineupData The lineup data containing both teams' player positions
@@ -26,7 +27,8 @@ export declare function generateLineupFromPositioning(positioningData: Array<{
 }>, homeTeamName: string, awayTeamName: string, config?: LineupConfig): HTMLCanvasElement;
 export { Team, Position, LayoutType, SubstitutesPosition };
 export { FootballLineupRenderer };
-export type { LineupData, LineupConfig, Player, PlayerPositioning, SubstitutesConfig };
+export { RecordingController };
+export type { LineupData, LineupConfig, Player, PlayerPositioning, SubstitutesConfig, RecordingOptions, RecordingState };
 declare const _default: {
     generateLineup: typeof generateLineup;
     generateLineupFromPositioning: typeof generateLineupFromPositioning;
@@ -35,5 +37,6 @@ declare const _default: {
     LayoutType: typeof LayoutType;
     SubstitutesPosition: typeof SubstitutesPosition;
     FootballLineupRenderer: typeof FootballLineupRenderer;
+    RecordingController: typeof RecordingController;
 };
 export default _default;

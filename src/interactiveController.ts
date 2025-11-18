@@ -27,9 +27,12 @@ export class InteractiveController {
   private playerCoordinates: PlayerWithCoordinates[] = [];
   private customCoordinates: CustomCoordinatesMap = new Map();
   private dragState: DragState | null = null;
-  private config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove'>> & {
+  private config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange'>> & {
     interactive: boolean;
     onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void;
+    recording?: boolean;
+    recordingOptions?: any;
+    onRecordingStateChange?: any;
   };
   private renderCallback: () => void;
   private isDragging = false;
@@ -38,9 +41,12 @@ export class InteractiveController {
 
   constructor(
     canvas: HTMLCanvasElement,
-    config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove'>> & {
+    config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange'>> & {
       interactive: boolean;
       onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void;
+      recording?: boolean;
+      recordingOptions?: any;
+      onRecordingStateChange?: any;
     },
     renderCallback: () => void,
     translateX: number = 0,

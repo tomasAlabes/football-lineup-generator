@@ -1,5 +1,6 @@
 import { FootballLineupRenderer } from './renderer.js';
 import { Team, Position, LayoutType, SubstitutesPosition } from './types.js';
+import { RecordingController } from './recordingController.js';
 // Football Lineup Generator - Main entry point for creating lineup visualizations
 /**
  * Creates a canvas element with a football lineup visualization
@@ -61,6 +62,7 @@ export function generateLineupFromPositioning(positioningData, homeTeamName, awa
 // Export types and enums for external use
 export { Team, Position, LayoutType, SubstitutesPosition };
 export { FootballLineupRenderer };
+export { RecordingController };
 // Export default
 export default {
     generateLineup,
@@ -70,4 +72,5 @@ export default {
     LayoutType,
     SubstitutesPosition,
     FootballLineupRenderer,
+    RecordingController,
 };

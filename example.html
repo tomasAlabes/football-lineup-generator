@@ -200,6 +200,23 @@
                 </label>
             </div>
 
+            <div style="margin-top: 10px;">
+                <label>
+                    <input type="checkbox" id="recordingMode" />
+                    <strong>Recording Mode</strong> - Record canvas while dragging players
+                </label>
+            </div>
+
+            <div id="recording-controls" style="margin-top: 10px; display: none;">
+                <h4>Recording Controls:</h4>
+                <button id="startRecordingBtn" style="background: #f44336;">⏺ Start Recording</button>
+                <button id="pauseRecordingBtn" style="background: #ff9800; display: none;">⏸ Pause</button>
+                <button id="resumeRecordingBtn" style="background: #4CAF50; display: none;">▶ Resume</button>
+                <button id="stopRecordingBtn" style="background: #9E9E9E; display: none;">⏹ Stop</button>
+                <button id="downloadRecordingBtn" style="background: #2196F3; display: none;">⬇ Download Recording</button>
+                <span id="recording-status" style="margin-left: 10px; font-weight: bold; color: #666;"></span>
+            </div>
+
             <h4>Styling Options:</h4>
             <div class="grid">
                 <div class="color-input-container">
@@ -236,7 +253,10 @@
 
     <script type="module">
         // Import from the compiled library
-        import { generateLineup, Team, Position, LayoutType } from './dist/index.js';
+        import { generateLineup, FootballLineupRenderer, Team, Position, LayoutType } from './dist/index.js';
+
+        // Store renderer instance globally for recording controls
+        let currentRenderer = null;
 
         // Formation templates
         const formations = {
@@ -453,6 +473,7 @@
             const canvasSize = document.getElementById('canvasSize').value.split('x');
             const layoutType = document.getElementById('layoutType').value;
             const interactiveMode = document.getElementById('interactiveMode').checked;
+            const recordingMode = document.getElementById('recordingMode').checked;
 
             const formation = formations[currentFormation];
 
@@ -505,11 +526,32 @@
                     }
 
                     console.log(`Player moved: ${playerName} from ${teamName} to position (${x}, ${y})`);
+                } : undefined,
+                recording: recordingMode,
+                recordingOptions: {
+                    fps: 30,
+                    videoBitsPerSecond: 2500000
+                },
+                onRecordingStateChange: recordingMode ? (state) => {
+                    updateRecordingStatus(state);
                 } : undefined
             };
 
             try {
-                const canvas = generateLineup(lineupData, config);
+                // Clean up previous renderer if exists
+                if (currentRenderer) {
+                    currentRenderer.destroy();
+                    currentRenderer = null;
+                }
+
+                // Create canvas element
+                const canvas = document.createElement('canvas');
+
+                // Initialize renderer
+                currentRenderer = new FootballLineupRenderer(canvas, config);
+
+                // Render the lineup
+                currentRenderer.render(lineupData);
 
                 const display = document.getElementById('lineup-display');
                 display.innerHTML = '';
@@ -536,6 +578,87 @@
             previewElement.style.backgroundColor = colorInput.value;
         }
 
+        // Update recording status and button visibility
+        function updateRecordingStatus(state) {
+            const statusEl = document.getElementById('recording-status');
+            const startBtn = document.getElementById('startRecordingBtn');
+            const pauseBtn = document.getElementById('pauseRecordingBtn');
+            const resumeBtn = document.getElementById('resumeRecordingBtn');
+            const stopBtn = document.getElementById('stopRecordingBtn');
+            const downloadBtn = document.getElementById('downloadRecordingBtn');
+
+            // Update status text
+            switch (state) {
+                case 'idle':
+                    statusEl.textContent = '';
+                    startBtn.style.display = 'inline-block';
+                    pauseBtn.style.display = 'none';
+                    resumeBtn.style.display = 'none';
+                    stopBtn.style.display = 'none';
+                    downloadBtn.style.display = 'none';
+                    break;
+                case 'recording':
+                    statusEl.textContent = '🔴 Recording...';
+                    statusEl.style.color = '#f44336';
+                    startBtn.style.display = 'none';
+                    pauseBtn.style.display = 'inline-block';
+                    resumeBtn.style.display = 'none';
+                    stopBtn.style.display = 'inline-block';
+                    downloadBtn.style.display = 'none';
+                    break;
+                case 'paused':
+                    statusEl.textContent = '⏸ Paused';
+                    statusEl.style.color = '#ff9800';
+                    startBtn.style.display = 'none';
+                    pauseBtn.style.display = 'none';
+                    resumeBtn.style.display = 'inline-block';
+                    stopBtn.style.display = 'inline-block';
+                    downloadBtn.style.display = 'none';
+                    break;
+                case 'stopped':
+                    statusEl.textContent = '✓ Recording stopped';
+                    statusEl.style.color = '#4CAF50';
+                    startBtn.style.display = 'inline-block';
+                    pauseBtn.style.display = 'none';
+                    resumeBtn.style.display = 'none';
+                    stopBtn.style.display = 'none';
+                    downloadBtn.style.display = 'inline-block';
+                    break;
+            }
+        }
+
+        // Recording control functions
+        function startRecording() {
+            if (currentRenderer) {
+                currentRenderer.startRecording();
+            }
+        }
+
+        function pauseRecording() {
+            if (currentRenderer) {
+                currentRenderer.pauseRecording();
+            }
+        }
+
+        function resumeRecording() {
+            if (currentRenderer) {
+                currentRenderer.resumeRecording();
+            }
+        }
+
+        function stopRecording() {
+            if (currentRenderer) {
+                currentRenderer.stopRecording();
+            }
+        }
+
+        function downloadRecording() {
+            if (currentRenderer) {
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+                currentRenderer.downloadRecording(`lineup-recording-${timestamp}.webm`);
+            }
+        }
+
         // Handle automatic lineup generation and control changes
         document.addEventListener('DOMContentLoaded', function() {
             // Add event listeners for automatic lineup generation
@@ -554,11 +677,33 @@
 
             // Auto-generate lineup when other controls change
             const interactiveModeCheckbox = document.getElementById('interactiveMode');
-            [canvasSizeSelect, fieldColorInput, homeColorInput, awayColorInput, homeTeamInput, awayTeamInput, interactiveModeCheckbox].forEach(control => {
+            const recordingModeCheckbox = document.getElementById('recordingMode');
+
+            [canvasSizeSelect, fieldColorInput, homeColorInput, awayColorInput, homeTeamInput, awayTeamInput, interactiveModeCheckbox, recordingModeCheckbox].forEach(control => {
                 control.addEventListener('change', function() {
                     generateLineupExample();
                 });
             });
+
+            // Show/hide recording controls based on recording mode checkbox
+            recordingModeCheckbox.addEventListener('change', function() {
+                const recordingControls = document.getElementById('recording-controls');
+                if (recordingControls) {
+                    recordingControls.style.display = this.checked ? 'block' : 'none';
+                }
+
+                // If recording is disabled, also enable interactive mode
+                if (this.checked && !interactiveModeCheckbox.checked) {
+                    interactiveModeCheckbox.checked = true;
+                }
+            });
+
+            // Recording button event listeners
+            document.getElementById('startRecordingBtn').addEventListener('click', startRecording);
+            document.getElementById('pauseRecordingBtn').addEventListener('click', pauseRecording);
+            document.getElementById('resumeRecordingBtn').addEventListener('click', resumeRecording);
+            document.getElementById('stopRecordingBtn').addEventListener('click', stopRecording);
+            document.getElementById('downloadRecordingBtn').addEventListener('click', downloadRecording);
 
             // Generate initial lineup
             setTimeout(generateLineupExample, 500);
