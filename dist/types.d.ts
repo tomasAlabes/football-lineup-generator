@@ -67,6 +67,12 @@ export interface BallConfig {
     initialX?: number;
     initialY?: number;
 }
+export interface RecordingUIConfig {
+    enabled?: boolean;
+    container?: HTMLElement;
+    position?: 'top' | 'bottom' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+    theme?: 'light' | 'dark';
+}
 export interface LineupConfig {
     width?: number;
     height?: number;
@@ -84,6 +90,7 @@ export interface LineupConfig {
     onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void;
     recording?: boolean;
     recordingOptions?: RecordingOptions;
+    recordingUI?: boolean | RecordingUIConfig;
     onRecordingStateChange?: (state: 'idle' | 'recording' | 'paused' | 'stopped') => void;
     ball?: boolean | BallConfig;
     onBallMove?: (x: number, y: number) => void;

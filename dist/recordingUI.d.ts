@@ -1,0 +1,38 @@
+import type { RecordingState } from './recordingController.js';
+import type { RecordingUIConfig } from './types.js';
+export declare class RecordingUI {
+    private uiContainer;
+    private controlsContainer;
+    private startBtn;
+    private pauseBtn;
+    private resumeBtn;
+    private stopBtn;
+    private downloadBtn;
+    private statusIndicator;
+    private config;
+    private onStart?;
+    private onPause?;
+    private onResume?;
+    private onStop?;
+    private onDownload?;
+    constructor(config?: RecordingUIConfig);
+    private createContainer;
+    private getPositionStyles;
+    private createControlsContainer;
+    private createButton;
+    private createStatusIndicator;
+    private attachEventListeners;
+    setCallbacks(callbacks: {
+        onStart?: () => void;
+        onPause?: () => void;
+        onResume?: () => void;
+        onStop?: () => void;
+        onDownload?: () => void;
+    }): void;
+    updateState(state: RecordingState): void;
+    private updateButtonStates;
+    private updateStatusIndicator;
+    show(): void;
+    hide(): void;
+    destroy(): void;
+}

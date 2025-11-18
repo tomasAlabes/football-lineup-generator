@@ -6,6 +6,7 @@ export declare class FootballLineupRenderer {
     private config;
     private interactiveController;
     private recordingController;
+    private recordingUI;
     private lineupData;
     constructor(canvas: HTMLCanvasElement, config?: LineupConfig);
     render(lineupData: LineupData): void;

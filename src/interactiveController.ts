@@ -5,7 +5,9 @@ import type {
   FieldCoordinates,
   Team,
   CustomCoordinatesMap,
-  BallConfig
+  BallConfig,
+  RecordingOptions,
+  RecordingUIConfig
 } from './types.js';
 import { Position } from './types.js';
 
@@ -36,12 +38,13 @@ export class InteractiveController {
   private dragState: DragState | null = null;
   private ballDragState: BallDragState | null = null;
   private ballPosition: FieldCoordinates | null = null;
-  private config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange' | 'ball' | 'onBallMove'>> & {
+  private config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'recordingUI' | 'onRecordingStateChange' | 'ball' | 'onBallMove'>> & {
     interactive: boolean;
     onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void;
     recording?: boolean;
-    recordingOptions?: any;
-    onRecordingStateChange?: any;
+    recordingOptions?: RecordingOptions;
+    recordingUI?: boolean | RecordingUIConfig;
+    onRecordingStateChange?: (state: 'idle' | 'recording' | 'paused' | 'stopped') => void;
     ball?: boolean | BallConfig;
     onBallMove?: (x: number, y: number) => void;
   };
@@ -52,12 +55,13 @@ export class InteractiveController {
 
   constructor(
     canvas: HTMLCanvasElement,
-    config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange' | 'ball' | 'onBallMove'>> & {
+    config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'recordingUI' | 'onRecordingStateChange' | 'ball' | 'onBallMove'>> & {
       interactive: boolean;
       onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void;
       recording?: boolean;
-      recordingOptions?: any;
-      onRecordingStateChange?: any;
+      recordingOptions?: RecordingOptions;
+      recordingUI?: boolean | RecordingUIConfig;
+      onRecordingStateChange?: (state: 'idle' | 'recording' | 'paused' | 'stopped') => void;
       ball?: boolean | BallConfig;
       onBallMove?: (x: number, y: number) => void;
     },

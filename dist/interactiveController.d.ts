@@ -1,4 +1,4 @@
-import type { LineupData, LineupConfig, PlayerPositioning, FieldCoordinates, Team, CustomCoordinatesMap, BallConfig } from './types.js';
+import type { LineupData, LineupConfig, PlayerPositioning, FieldCoordinates, Team, CustomCoordinatesMap, BallConfig, RecordingOptions, RecordingUIConfig } from './types.js';
 interface PlayerWithCoordinates {
     player: PlayerPositioning;
     coordinates: FieldCoordinates;
@@ -17,12 +17,13 @@ export declare class InteractiveController {
     private isDragging;
     private canvasTranslateX;
     private canvasTranslateY;
-    constructor(canvas: HTMLCanvasElement, config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange' | 'ball' | 'onBallMove'>> & {
+    constructor(canvas: HTMLCanvasElement, config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'recordingUI' | 'onRecordingStateChange' | 'ball' | 'onBallMove'>> & {
         interactive: boolean;
         onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void;
         recording?: boolean;
-        recordingOptions?: any;
-        onRecordingStateChange?: any;
+        recordingOptions?: RecordingOptions;
+        recordingUI?: boolean | RecordingUIConfig;
+        onRecordingStateChange?: (state: 'idle' | 'recording' | 'paused' | 'stopped') => void;
         ball?: boolean | BallConfig;
         onBallMove?: (x: number, y: number) => void;
     }, renderCallback: () => void, translateX?: number, translateY?: number);

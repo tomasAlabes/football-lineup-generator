@@ -1,5 +1,6 @@
-import type { LineupData, LineupConfig, SubstitutesConfig, CustomCoordinatesMap } from '../types.js';
+import type { LineupData, LineupConfig, SubstitutesConfig, CustomCoordinatesMap, Team, BallConfig, RecordingOptions, PlayerPositioning, FieldCoordinates, RecordingUIConfig } from '../types.js';
 import { Position } from '../types.js';
+import type { RecordingState } from '../recordingController.js';
 import { drawField } from './drawField.js';
 import { drawTeamLabel } from './drawTeamLabel.js';
 import { calculatePlayerCoordinates } from './calculatePlayerCoordinates.js';
@@ -8,19 +9,28 @@ import { drawPlayer } from './drawPlayer.js';
 import { drawSubstitutesList } from './drawSubstitutesList.js';
 
 
+interface PlayerWithCoordinates {
+  player: PlayerPositioning;
+  coordinates: FieldCoordinates;
+  isHomeTeam: boolean;
+}
+
 export function renderHalfPitch(
   ctx: CanvasRenderingContext2D,
   lineupData: LineupData,
-  config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange'>> & {
+  config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'recordingUI' | 'onRecordingStateChange' | 'ball' | 'onBallMove'>> & {
     showSubstitutes: SubstitutesConfig;
     interactive?: boolean;
-    onPlayerMove?: (playerId: number, team: any, x: number, y: number) => void;
+    onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void;
     recording?: boolean;
-    recordingOptions?: any;
-    onRecordingStateChange?: any;
+    recordingOptions?: RecordingOptions;
+    recordingUI?: boolean | RecordingUIConfig;
+    onRecordingStateChange?: (state: RecordingState) => void;
+    ball?: BallConfig;
+    onBallMove?: (x: number, y: number) => void;
   },
   customCoordinates?: CustomCoordinatesMap
-): any[] {
+): PlayerWithCoordinates[] {
   // Draw field
   drawField(
     ctx,

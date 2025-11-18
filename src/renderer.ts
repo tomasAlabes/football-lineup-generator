@@ -1,4 +1,4 @@
-import type { LineupData, LineupConfig, SubstitutesConfig, CustomCoordinatesMap, BallConfig } from './types.js';
+import type { LineupData, LineupConfig, SubstitutesConfig, CustomCoordinatesMap, BallConfig, PlayerPositioning, FieldCoordinates, RecordingOptions, Team, RecordingUIConfig } from './types.js';
 import { LayoutType, SubstitutesPosition } from './types.js';
 
 // Import all the extracted functions
@@ -13,21 +13,26 @@ import { InteractiveController } from './interactiveController.js';
 // Import recording controller
 import { RecordingController, type RecordingState } from './recordingController.js';
 
+// Import recording UI
+import { RecordingUI } from './recordingUI.js';
+
 export class FootballLineupRenderer {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'onRecordingStateChange' | 'ball' | 'onBallMove'>> & {
+  private config: Required<Omit<LineupConfig, 'showSubstitutes' | 'interactive' | 'onPlayerMove' | 'recording' | 'recordingOptions' | 'recordingUI' | 'onRecordingStateChange' | 'ball' | 'onBallMove'>> & {
     showSubstitutes: SubstitutesConfig;
     interactive: boolean;
-    onPlayerMove?: (playerId: number, team: any, x: number, y: number) => void;
+    onPlayerMove?: (playerId: number, team: Team, x: number, y: number) => void;
     recording: boolean;
-    recordingOptions?: any;
+    recordingOptions?: RecordingOptions;
+    recordingUI?: boolean | RecordingUIConfig;
     onRecordingStateChange?: (state: RecordingState) => void;
     ball: BallConfig;
     onBallMove?: (x: number, y: number) => void;
   };
   private interactiveController: InteractiveController | null = null;
   private recordingController: RecordingController | null = null;
+  private recordingUI: RecordingUI | null = null;
   private lineupData: LineupData | null = null;
 
   constructor(canvas: HTMLCanvasElement, config: LineupConfig = {}) {
@@ -96,6 +101,7 @@ export class FootballLineupRenderer {
       onPlayerMove: config.onPlayerMove,
       recording: config.recording ?? false,
       recordingOptions: config.recordingOptions,
+      recordingUI: config.recordingUI,
       onRecordingStateChange: config.onRecordingStateChange,
       ball: ballConfig,
       onBallMove: config.onBallMove,
@@ -147,11 +153,41 @@ export class FootballLineupRenderer {
 
     // Initialize recording controller if recording mode is enabled
     if (this.config.recording) {
+      // Determine if UI should be enabled
+      const uiEnabled = config.recordingUI !== false; // Enabled by default unless explicitly set to false
+
+      // Create combined onRecordingStateChange callback
+      const stateChangeCallback = (state: RecordingState) => {
+        // Update recording UI if it exists
+        if (this.recordingUI) {
+          this.recordingUI.updateState(state);
+        }
+        // Call user's callback if provided
+        if (this.config.onRecordingStateChange) {
+          this.config.onRecordingStateChange(state);
+        }
+      };
+
       this.recordingController = new RecordingController(
         this.canvas,
         this.config.recordingOptions,
-        this.config.onRecordingStateChange
+        stateChangeCallback
       );
+
+      // Initialize recording UI if enabled
+      if (uiEnabled) {
+        const uiConfig = typeof config.recordingUI === 'object' ? config.recordingUI : {};
+        this.recordingUI = new RecordingUI(uiConfig);
+
+        // Set up UI callbacks
+        this.recordingUI.setCallbacks({
+          onStart: () => this.startRecording(),
+          onPause: () => this.pauseRecording(),
+          onResume: () => this.resumeRecording(),
+          onStop: () => this.stopRecording(),
+          onDownload: () => this.downloadRecording()
+        });
+      }
     }
   }
 
@@ -168,17 +204,23 @@ export class FootballLineupRenderer {
     // Get custom coordinates if in interactive mode
     const customCoordinates = this.interactiveController?.getCustomCoordinates();
 
-    let playerCoordinates: any[] = [];
+    interface PlayerWithCoordinates {
+      player: PlayerPositioning;
+      coordinates: FieldCoordinates;
+      isHomeTeam: boolean;
+    }
+
+    let playerCoordinates: PlayerWithCoordinates[] = [];
 
     switch (this.config.layoutType) {
       case LayoutType.FULL_PITCH:
-        playerCoordinates = renderFullPitch(this.ctx, lineupData, this.config as any, customCoordinates);
+        playerCoordinates = renderFullPitch(this.ctx, lineupData, this.config, customCoordinates);
         break;
       case LayoutType.HALF_PITCH:
-        playerCoordinates = renderHalfPitch(this.ctx, lineupData, this.config as any, customCoordinates);
+        playerCoordinates = renderHalfPitch(this.ctx, lineupData, this.config, customCoordinates);
         break;
       case LayoutType.SPLIT_PITCH:
-        playerCoordinates = renderSplitPitch(this.ctx, lineupData, this.config as any, customCoordinates);
+        playerCoordinates = renderSplitPitch(this.ctx, lineupData, this.config, customCoordinates);
         break;
     }
 
@@ -209,6 +251,9 @@ export class FootballLineupRenderer {
     }
     if (this.recordingController) {
       this.recordingController.destroy();
+    }
+    if (this.recordingUI) {
+      this.recordingUI.destroy();
     }
   }
 

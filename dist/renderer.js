@@ -8,10 +8,13 @@ import { drawBall } from './functions/drawBall.js';
 import { InteractiveController } from './interactiveController.js';
 // Import recording controller
 import { RecordingController } from './recordingController.js';
+// Import recording UI
+import { RecordingUI } from './recordingUI.js';
 export class FootballLineupRenderer {
     constructor(canvas, config = {}) {
         this.interactiveController = null;
         this.recordingController = null;
+        this.recordingUI = null;
         this.lineupData = null;
         this.canvas = canvas;
         const context = canvas.getContext('2d');
@@ -79,6 +82,7 @@ export class FootballLineupRenderer {
             onPlayerMove: config.onPlayerMove,
             recording: config.recording ?? false,
             recordingOptions: config.recordingOptions,
+            recordingUI: config.recordingUI,
             onRecordingStateChange: config.onRecordingStateChange,
             ball: ballConfig,
             onBallMove: config.onBallMove,
@@ -121,7 +125,33 @@ export class FootballLineupRenderer {
         }
         // Initialize recording controller if recording mode is enabled
         if (this.config.recording) {
-            this.recordingController = new RecordingController(this.canvas, this.config.recordingOptions, this.config.onRecordingStateChange);
+            // Determine if UI should be enabled
+            const uiEnabled = config.recordingUI !== false; // Enabled by default unless explicitly set to false
+            // Create combined onRecordingStateChange callback
+            const stateChangeCallback = (state) => {
+                // Update recording UI if it exists
+                if (this.recordingUI) {
+                    this.recordingUI.updateState(state);
+                }
+                // Call user's callback if provided
+                if (this.config.onRecordingStateChange) {
+                    this.config.onRecordingStateChange(state);
+                }
+            };
+            this.recordingController = new RecordingController(this.canvas, this.config.recordingOptions, stateChangeCallback);
+            // Initialize recording UI if enabled
+            if (uiEnabled) {
+                const uiConfig = typeof config.recordingUI === 'object' ? config.recordingUI : {};
+                this.recordingUI = new RecordingUI(uiConfig);
+                // Set up UI callbacks
+                this.recordingUI.setCallbacks({
+                    onStart: () => this.startRecording(),
+                    onPause: () => this.pauseRecording(),
+                    onResume: () => this.resumeRecording(),
+                    onStop: () => this.stopRecording(),
+                    onDownload: () => this.downloadRecording()
+                });
+            }
         }
     }
     render(lineupData) {
@@ -165,6 +195,9 @@ export class FootballLineupRenderer {
         }
         if (this.recordingController) {
             this.recordingController.destroy();
+        }
+        if (this.recordingUI) {
+            this.recordingUI.destroy();
         }
     }
     // Interactive mode methods

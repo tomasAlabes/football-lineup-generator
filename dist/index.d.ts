@@ -1,5 +1,5 @@
 import { FootballLineupRenderer } from './renderer.js';
-import type { LineupData, LineupConfig, Player, PlayerPositioning, SubstitutesConfig, RecordingOptions, BallConfig } from './types.js';
+import type { LineupData, LineupConfig, Player, PlayerPositioning, SubstitutesConfig, RecordingOptions, BallConfig, RecordingUIConfig } from './types.js';
 import { Team, Position, LayoutType, SubstitutesPosition } from './types.js';
 import { RecordingController, type RecordingState } from './recordingController.js';
 /**
@@ -28,7 +28,7 @@ export declare function generateLineupFromPositioning(positioningData: Array<{
 export { Team, Position, LayoutType, SubstitutesPosition };
 export { FootballLineupRenderer };
 export { RecordingController };
-export type { LineupData, LineupConfig, Player, PlayerPositioning, SubstitutesConfig, RecordingOptions, RecordingState, BallConfig };
+export type { LineupData, LineupConfig, Player, PlayerPositioning, SubstitutesConfig, RecordingOptions, RecordingState, BallConfig, RecordingUIConfig };
 declare const _default: {
     generateLineup: typeof generateLineup;
     generateLineupFromPositioning: typeof generateLineupFromPositioning;
