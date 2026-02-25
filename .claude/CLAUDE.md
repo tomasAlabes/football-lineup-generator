@@ -98,8 +98,15 @@ Located in `src/functions/`:
 - `LineupConfig`: All rendering options (dimensions, colors, font sizes, layout type)
 - `FieldCoordinates`: Simple {x, y} object
 - `PositionCoordinates`: Map of Position enum to FieldCoordinates
+- `PlayerWithCoordinates`: `{ player: PlayerPositioning, coordinates: FieldCoordinates, isHomeTeam: boolean }` — returned by `getAllPlayerPositions()`
 
 ## Important Implementation Details
+
+**`getAllPlayerPositions()` is only valid after `render()`**
+`InteractiveController.playerCoordinates` is populated by `updatePlayerCoordinates()` inside `render()`. Calling `getAllPlayerPositions()` before the first `render()` returns `[]`.
+
+**`PlayerWithCoordinates` type duplication (known technical debt)**
+The canonical definition is `src/types.ts`. Four local duplicates remain in `src/functions/` (renderFullPitch.ts, renderHalfPitch.ts, renderSplitPitch.ts, calculateLabelPositions.ts) that should eventually be migrated to import from types.ts.
 
 **Full Pitch Layout Anti-Overlap Strategy**
 Home team players have -20px x-offset, away team players get +20px offset after mirroring. This prevents center-positioned players from overlapping when teams face each other.
