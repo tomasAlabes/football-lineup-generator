@@ -1,4 +1,4 @@
-import type { LineupData, LineupConfig, SubstitutesConfig, CustomCoordinatesMap, BallConfig, PlayerPositioning, FieldCoordinates, RecordingOptions, Team, RecordingUIConfig } from './types.js';
+import type { LineupData, LineupConfig, SubstitutesConfig, CustomCoordinatesMap, BallConfig, PlayerPositioning, FieldCoordinates, RecordingOptions, Team, RecordingUIConfig, PlayerWithCoordinates } from './types.js';
 import { LayoutType, SubstitutesPosition } from './types.js';
 
 // Import all the extracted functions
@@ -204,12 +204,6 @@ export class FootballLineupRenderer {
     // Get custom coordinates if in interactive mode
     const customCoordinates = this.interactiveController?.getCustomCoordinates();
 
-    interface PlayerWithCoordinates {
-      player: PlayerPositioning;
-      coordinates: FieldCoordinates;
-      isHomeTeam: boolean;
-    }
-
     let playerCoordinates: PlayerWithCoordinates[] = [];
 
     switch (this.config.layoutType) {
@@ -274,6 +268,23 @@ export class FootballLineupRenderer {
   public clearCustomCoordinates(): void {
     if (this.interactiveController) {
       this.interactiveController.clearCustomCoordinates();
+      if (this.lineupData) {
+        this.render(this.lineupData);
+      }
+    }
+  }
+
+  public getAllPlayerPositions(): PlayerWithCoordinates[] {
+    return this.interactiveController?.getAllPlayerPositions() ?? [];
+  }
+
+  public getBallPosition(): FieldCoordinates | null {
+    return this.interactiveController?.getBallPosition() ?? null;
+  }
+
+  public setBallPosition(x: number, y: number): void {
+    if (this.interactiveController) {
+      this.interactiveController.setBallPosition({ x, y });
       if (this.lineupData) {
         this.render(this.lineupData);
       }

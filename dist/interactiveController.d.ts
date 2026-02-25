@@ -1,9 +1,4 @@
-import type { LineupData, LineupConfig, PlayerPositioning, FieldCoordinates, Team, CustomCoordinatesMap, BallConfig, RecordingOptions, RecordingUIConfig } from './types.js';
-interface PlayerWithCoordinates {
-    player: PlayerPositioning;
-    coordinates: FieldCoordinates;
-    isHomeTeam: boolean;
-}
+import type { LineupData, LineupConfig, FieldCoordinates, Team, CustomCoordinatesMap, BallConfig, RecordingOptions, RecordingUIConfig, PlayerWithCoordinates } from './types.js';
 export declare class InteractiveController {
     private canvas;
     private lineupData;
@@ -31,6 +26,7 @@ export declare class InteractiveController {
     detachEventListeners(): void;
     updatePlayerCoordinates(coordinates: PlayerWithCoordinates[]): void;
     updateLineupData(lineupData: LineupData): void;
+    getAllPlayerPositions(): PlayerWithCoordinates[];
     getCustomCoordinates(): CustomCoordinatesMap;
     setCustomCoordinate(playerId: number, team: Team, coordinates: FieldCoordinates): void;
     clearCustomCoordinates(): void;
@@ -46,4 +42,3 @@ export declare class InteractiveController {
     private handleTouchMove;
     private handleTouchEnd;
 }
-export {};

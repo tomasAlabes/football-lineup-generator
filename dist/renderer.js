@@ -220,6 +220,20 @@ export class FootballLineupRenderer {
             }
         }
     }
+    getAllPlayerPositions() {
+        return this.interactiveController?.getAllPlayerPositions() ?? [];
+    }
+    getBallPosition() {
+        return this.interactiveController?.getBallPosition() ?? null;
+    }
+    setBallPosition(x, y) {
+        if (this.interactiveController) {
+            this.interactiveController.setBallPosition({ x, y });
+            if (this.lineupData) {
+                this.render(this.lineupData);
+            }
+        }
+    }
     // Recording mode methods
     startRecording() {
         if (!this.recordingController) {

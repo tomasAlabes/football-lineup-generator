@@ -224,6 +224,9 @@ export class InteractiveController {
     updateLineupData(lineupData) {
         this.lineupData = lineupData;
     }
+    getAllPlayerPositions() {
+        return this.playerCoordinates;
+    }
     getCustomCoordinates() {
         return this.customCoordinates;
     }

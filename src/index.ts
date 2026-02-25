@@ -1,5 +1,5 @@
 import { FootballLineupRenderer } from './renderer.js';
-import type { LineupData, LineupConfig, Player, PlayerPositioning, SubstitutesConfig, RecordingOptions, BallConfig, RecordingUIConfig } from './types.js';
+import type { LineupData, LineupConfig, Player, PlayerPositioning, SubstitutesConfig, RecordingOptions, BallConfig, RecordingUIConfig, PlayerWithCoordinates, FieldCoordinates } from './types.js';
 import { Team, Position, LayoutType, SubstitutesPosition } from './types.js';
 import { RecordingController, type RecordingState } from './recordingController.js';
 
@@ -86,7 +86,7 @@ export function generateLineupFromPositioning(
 export { Team, Position, LayoutType, SubstitutesPosition };
 export { FootballLineupRenderer };
 export { RecordingController };
-export type { LineupData, LineupConfig, Player, PlayerPositioning, SubstitutesConfig, RecordingOptions, RecordingState, BallConfig, RecordingUIConfig };
+export type { LineupData, LineupConfig, Player, PlayerPositioning, SubstitutesConfig, RecordingOptions, RecordingState, BallConfig, RecordingUIConfig, PlayerWithCoordinates, FieldCoordinates };
 
 // Export default
 export default {

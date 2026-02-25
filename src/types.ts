@@ -122,4 +122,10 @@ export interface CustomPlayerCoordinate {
   y: number;
 }
 
-export type CustomCoordinatesMap = Map<string, FieldCoordinates>; 
+export type CustomCoordinatesMap = Map<string, FieldCoordinates>;
+
+export interface PlayerWithCoordinates {
+  player: PlayerPositioning;
+  coordinates: FieldCoordinates;
+  isHomeTeam: boolean;
+}

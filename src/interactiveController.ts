@@ -7,15 +7,10 @@ import type {
   CustomCoordinatesMap,
   BallConfig,
   RecordingOptions,
-  RecordingUIConfig
+  RecordingUIConfig,
+  PlayerWithCoordinates
 } from './types.js';
 import { Position } from './types.js';
-
-interface PlayerWithCoordinates {
-  player: PlayerPositioning;
-  coordinates: FieldCoordinates;
-  isHomeTeam: boolean;
-}
 
 interface DragState {
   player: PlayerPositioning;
@@ -126,6 +121,10 @@ export class InteractiveController {
 
   public updateLineupData(lineupData: LineupData): void {
     this.lineupData = lineupData;
+  }
+
+  public getAllPlayerPositions(): PlayerWithCoordinates[] {
+    return this.playerCoordinates;
   }
 
   public getCustomCoordinates(): CustomCoordinatesMap {

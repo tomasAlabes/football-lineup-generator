@@ -1,4 +1,4 @@
-import type { LineupData, LineupConfig, CustomCoordinatesMap } from './types.js';
+import type { LineupData, LineupConfig, CustomCoordinatesMap, FieldCoordinates, PlayerWithCoordinates } from './types.js';
 import { type RecordingState } from './recordingController.js';
 export declare class FootballLineupRenderer {
     private canvas;
@@ -14,6 +14,9 @@ export declare class FootballLineupRenderer {
     getCustomCoordinates(): CustomCoordinatesMap | undefined;
     setCustomCoordinate(playerId: number, team: any, x: number, y: number): void;
     clearCustomCoordinates(): void;
+    getAllPlayerPositions(): PlayerWithCoordinates[];
+    getBallPosition(): FieldCoordinates | null;
+    setBallPosition(x: number, y: number): void;
     startRecording(): void;
     pauseRecording(): void;
     resumeRecording(): void;
