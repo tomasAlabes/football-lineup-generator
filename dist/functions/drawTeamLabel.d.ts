@@ -1,1 +1,0 @@
-export declare function drawTeamLabel(ctx: CanvasRenderingContext2D, teamName: string, isHomeTeam: boolean, width: number, homeTeamColor: string, awayTeamColor: string, fontSize: number, offsetX?: number): void;

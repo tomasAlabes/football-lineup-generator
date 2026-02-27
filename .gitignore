@@ -85,5 +85,5 @@ temp/
 ehthumbs.db
 Thumbs.db
 
-# Compiled output (keep dist for publishing)
-# dist/ 
+# Compiled output (built in CI for GitHub Pages, generated locally before npm publish)
+dist/

@@ -26,19 +26,19 @@ export function getPositionCoordinates(
     [Position.DEFENSIVE_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.4, y: height / 2 },
     
     // Midfielders - improved spacing
-    [Position.LEFT_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.55, y: height * 0.25 },
+    [Position.LEFT_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.55, y: height * 0.3 },
     [Position.CENTER_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.55, y: height / 2 },
-    [Position.RIGHT_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.55, y: height * 0.75 },
-    [Position.ATTACKING_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.7, y: height / 2 },
+    [Position.RIGHT_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.55, y: height * 0.7 },
+    [Position.ATTACKING_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.65, y: height / 2 },
     
     // Wingers
     [Position.LEFT_WINGER]: { x: fieldMargin + fieldWidth * 0.75, y: height * 0.2 },
     [Position.RIGHT_WINGER]: { x: fieldMargin + fieldWidth * 0.75, y: height * 0.8 },
     
     // Forwards - better spacing
-    [Position.LEFT_FORWARD]: { x: fieldMargin + fieldWidth * 0.88, y: height * 0.35 },
-    [Position.CENTER_FORWARD]: { x: fieldMargin + fieldWidth * 0.88, y: height / 2 },
-    [Position.RIGHT_FORWARD]: { x: fieldMargin + fieldWidth * 0.88, y: height * 0.65 },
+    [Position.LEFT_FORWARD]: { x: fieldMargin + fieldWidth * 0.85, y: height * 0.35 },
+    [Position.CENTER_FORWARD]: { x: fieldMargin + fieldWidth * 0.85, y: height / 2 },
+    [Position.RIGHT_FORWARD]: { x: fieldMargin + fieldWidth * 0.85, y: height * 0.65 },
     
     // Substitutes (off-field)
     [Position.SUBSTITUTE]: { x: actualWidth + 20, y: height / 2 },

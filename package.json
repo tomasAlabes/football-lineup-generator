@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "prepublishOnly": "npm run build",
     "build": "tsc",
     "dev": "npm run build && concurrently \"npm run watch\" \"npm run serve\"",
     "watch": "tsc --watch",
