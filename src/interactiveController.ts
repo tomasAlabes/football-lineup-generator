@@ -79,10 +79,12 @@ export class InteractiveController {
       const ballConfig: BallConfig = typeof this.config.ball === 'boolean'
         ? { enabled: this.config.ball }
         : this.config.ball;
-      this.ballPosition = {
-        x: ballConfig.initialX ?? this.config.width / 2,
-        y: ballConfig.initialY ?? this.config.height / 2
-      };
+      if (ballConfig.enabled) {
+        this.ballPosition = {
+          x: ballConfig.initialX ?? this.config.width / 2,
+          y: ballConfig.initialY ?? this.config.height / 2
+        };
+      }
     }
   }
 
@@ -191,6 +193,11 @@ export class InteractiveController {
     const ballConfig: BallConfig = typeof this.config.ball === 'boolean'
       ? { enabled: this.config.ball }
       : this.config.ball;
+
+    if (!ballConfig.enabled) {
+      return false;
+    }
+
     const ballSize = ballConfig.size ?? 10;
 
     const dx = x - this.ballPosition.x;
