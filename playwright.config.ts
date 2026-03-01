@@ -10,6 +10,7 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
+    viewport: { width: 1400, height: 1600 },
   },
 
   projects: [
@@ -20,7 +21,7 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm run serve',
+    command: 'http-server . -p 3000 --cors',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
   },

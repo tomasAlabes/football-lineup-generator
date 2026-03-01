@@ -1,236 +1,126 @@
 import { test, expect, Page } from '@playwright/test';
 
-// Helper to wait for lineup to be rendered
 async function waitForLineupRendered(page: Page) {
   await page.waitForSelector('canvas', { timeout: 5000 });
-  // Wait a bit for rendering to complete
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(500);
 }
 
-// Helper to find a player circle on the canvas
-async function getPlayerPosition(page: Page, playerName: string): Promise<{ x: number, y: number } | null> {
-  return await page.evaluate((name) => {
+async function enableInteractiveAndGenerate(page: Page, layoutType?: string) {
+  if (layoutType) {
+    await page.selectOption('#layoutType', layoutType);
+  }
+  await page.check('#interactiveMode');
+  await page.click('button:has-text("Generate Lineup")');
+  await waitForLineupRendered(page);
+}
+
+/**
+ * Returns the actual screen position of a player by converting canvas coordinates
+ * to page coordinates inside the browser, accounting for CSS scaling (max-width: 100%).
+ *
+ * @param team - 'home' | 'away' | 'any'
+ */
+async function getPlayerScreenPos(
+  page: Page,
+  team: 'home' | 'away' | 'any' = 'any'
+): Promise<{ x: number; y: number }> {
+  await page.locator('canvas').scrollIntoViewIfNeeded();
+  const pos = await page.evaluate((teamFilter) => {
+    const renderer = (window as any).currentRenderer;
+    if (!renderer) throw new Error('currentRenderer not found on window');
+
+    const players: Array<{ player: any; coordinates: { x: number; y: number }; isHomeTeam: boolean }> =
+      renderer.getAllPlayerPositions();
+
+    const field = players.filter(p => p.player.position !== 'substitute');
+    const match =
+      teamFilter === 'home' ? field.find(p => p.isHomeTeam) :
+      teamFilter === 'away' ? field.find(p => !p.isHomeTeam) :
+      field[0];
+
+    if (!match) return null;
+
+    // Account for CSS scaling (e.g. max-width: 100%)
     const canvas = document.querySelector('canvas') as HTMLCanvasElement;
-    if (!canvas) return null;
-
-    // This is a simplified approach - in reality we'd need to parse the canvas
-    // For now, we'll rely on the canvas bounding rect and known positions
     const rect = canvas.getBoundingClientRect();
+    const scaleX = rect.width / canvas.width;
+    const scaleY = rect.height / canvas.height;
 
-    // Try to find player by checking rendered coordinates
-    // This is a placeholder - we'd need to actually render and check
-    return { x: rect.left + 100, y: rect.top + 100 };
-  }, playerName);
+    return {
+      x: rect.left + match.coordinates.x * scaleX,
+      y: rect.top + match.coordinates.y * scaleY,
+    };
+  }, team);
+
+  if (!pos) throw new Error(`No ${team} field player found`);
+  return pos;
+}
+
+async function dragPlayer(page: Page, from: { x: number; y: number }, offset = 50) {
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(from.x + offset, from.y + offset, { steps: 10 });
+  await page.mouse.up();
 }
 
 test.describe('Interactive Mode', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/example.html');
+    await page.goto('/example.html');
     await waitForLineupRendered(page);
   });
 
   test('should enable interactive mode when checkbox is checked', async ({ page }) => {
-    // Check the interactive mode checkbox
-    await page.check('#interactiveMode');
-
-    // Generate lineup
-    await page.click('button:has-text("Generate Lineup")');
-    await waitForLineupRendered(page);
-
-    // Verify interactive info is displayed
-    const interactiveInfo = page.locator('#interactive-info');
-    await expect(interactiveInfo).toBeVisible();
+    await enableInteractiveAndGenerate(page);
+    await expect(page.locator('#interactive-info')).toBeVisible();
   });
 
   test('half pitch - home team player drag and drop', async ({ page }) => {
-    // Select half pitch layout
-    await page.selectOption('#layoutType', 'half_pitch');
-
-    // Enable interactive mode
-    await page.check('#interactiveMode');
-
-    // Generate lineup
-    await page.click('button:has-text("Generate Lineup")');
-    await waitForLineupRendered(page);
-
-    const canvas = page.locator('canvas');
-    const box = await canvas.boundingBox();
-    if (!box) throw new Error('Canvas not found');
-
-    // Find a player in the home team area (left half)
-    // For half pitch, home team should be on the left side
-    const initialX = box.x + box.width * 0.25; // 25% from left (home side)
-    const initialY = box.y + box.height * 0.5; // Middle height
-
-    // Drag to a new position (still in home half)
-    const targetX = box.x + box.width * 0.35;
-    const targetY = box.y + box.height * 0.6;
-
-    // Perform drag
-    await page.mouse.move(initialX, initialY);
-    await page.mouse.down();
-    await page.mouse.move(targetX, targetY);
-    await page.mouse.up();
-
-    // Check if last move was updated
-    const lastMove = page.locator('#last-move');
-    await expect(lastMove).not.toHaveText('No players moved yet...');
+    await enableInteractiveAndGenerate(page, 'half_pitch');
+    const pos = await getPlayerScreenPos(page, 'home');
+    await dragPlayer(page, pos);
+    await expect(page.locator('#last-move')).not.toHaveText('No players moved yet...');
   });
 
   test('full pitch - home team player drag and drop', async ({ page }) => {
-    // Select full pitch layout
-    await page.selectOption('#layoutType', 'full_pitch');
-
-    // Enable interactive mode
-    await page.check('#interactiveMode');
-
-    // Generate lineup
-    await page.click('button:has-text("Generate Lineup")');
-    await waitForLineupRendered(page);
-
-    const canvas = page.locator('canvas');
-    const box = await canvas.boundingBox();
-    if (!box) throw new Error('Canvas not found');
-
-    // Home team is on the left in full pitch
-    const initialX = box.x + box.width * 0.2;
-    const initialY = box.y + box.height * 0.5;
-
-    const targetX = box.x + box.width * 0.3;
-    const targetY = box.y + box.height * 0.6;
-
-    await page.mouse.move(initialX, initialY);
-    await page.mouse.down();
-    await page.mouse.move(targetX, targetY);
-    await page.mouse.up();
-
-    const lastMove = page.locator('#last-move');
-    await expect(lastMove).not.toHaveText('No players moved yet...');
+    await enableInteractiveAndGenerate(page, 'full_pitch');
+    const pos = await getPlayerScreenPos(page, 'home');
+    await dragPlayer(page, pos);
+    await expect(page.locator('#last-move')).not.toHaveText('No players moved yet...');
   });
 
   test('full pitch - away team player drag and drop', async ({ page }) => {
-    // Select full pitch layout
-    await page.selectOption('#layoutType', 'full_pitch');
-
-    // Enable interactive mode
-    await page.check('#interactiveMode');
-
-    // Generate lineup
-    await page.click('button:has-text("Generate Lineup")');
-    await waitForLineupRendered(page);
-
-    const canvas = page.locator('canvas');
-    const box = await canvas.boundingBox();
-    if (!box) throw new Error('Canvas not found');
-
-    // Away team is on the right in full pitch (mirrored)
-    const initialX = box.x + box.width * 0.8;
-    const initialY = box.y + box.height * 0.5;
-
-    const targetX = box.x + box.width * 0.7;
-    const targetY = box.y + box.height * 0.6;
-
-    await page.mouse.move(initialX, initialY);
-    await page.mouse.down();
-    await page.mouse.move(targetX, targetY);
-    await page.mouse.up();
-
-    const lastMove = page.locator('#last-move');
-    await expect(lastMove).not.toHaveText('No players moved yet...');
+    await enableInteractiveAndGenerate(page, 'full_pitch');
+    const pos = await getPlayerScreenPos(page, 'away');
+    await dragPlayer(page, pos);
+    await expect(page.locator('#last-move')).not.toHaveText('No players moved yet...');
   });
 
   test('split pitch - home team player drag and drop', async ({ page }) => {
-    // Select split pitch layout
-    await page.selectOption('#layoutType', 'split_pitch');
-
-    // Enable interactive mode
-    await page.check('#interactiveMode');
-
-    // Generate lineup
-    await page.click('button:has-text("Generate Lineup")');
-    await waitForLineupRendered(page);
-
-    const canvas = page.locator('canvas');
-    const box = await canvas.boundingBox();
-    if (!box) throw new Error('Canvas not found');
-
-    // In split pitch, home team is on the left rotated pitch
-    const initialX = box.x + box.width * 0.25; // Left pitch
-    const initialY = box.y + box.height * 0.5;
-
-    const targetX = box.x + box.width * 0.3;
-    const targetY = box.y + box.height * 0.6;
-
-    await page.mouse.move(initialX, initialY);
-    await page.mouse.down();
-    await page.mouse.move(targetX, targetY);
-    await page.mouse.up();
-
-    const lastMove = page.locator('#last-move');
-    await expect(lastMove).not.toHaveText('No players moved yet...');
+    await enableInteractiveAndGenerate(page, 'split_pitch');
+    const pos = await getPlayerScreenPos(page, 'home');
+    await dragPlayer(page, pos);
+    await expect(page.locator('#last-move')).not.toHaveText('No players moved yet...');
   });
 
   test('split pitch - away team player drag and drop', async ({ page }) => {
-    // Select split pitch layout
-    await page.selectOption('#layoutType', 'split_pitch');
-
-    // Enable interactive mode
-    await page.check('#interactiveMode');
-
-    // Generate lineup
-    await page.click('button:has-text("Generate Lineup")');
-    await waitForLineupRendered(page);
-
-    const canvas = page.locator('canvas');
-    const box = await canvas.boundingBox();
-    if (!box) throw new Error('Canvas not found');
-
-    // In split pitch, away team is on the right rotated pitch
-    const initialX = box.x + box.width * 0.75; // Right pitch
-    const initialY = box.y + box.height * 0.5;
-
-    const targetX = box.x + box.width * 0.7;
-    const targetY = box.y + box.height * 0.6;
-
-    await page.mouse.move(initialX, initialY);
-    await page.mouse.down();
-    await page.mouse.move(targetX, targetY);
-    await page.mouse.up();
-
-    const lastMove = page.locator('#last-move');
-    await expect(lastMove).not.toHaveText('No players moved yet...');
+    await enableInteractiveAndGenerate(page, 'split_pitch');
+    const pos = await getPlayerScreenPos(page, 'away');
+    await dragPlayer(page, pos);
+    await expect(page.locator('#last-move')).not.toHaveText('No players moved yet...');
   });
 
   test('player should follow cursor during drag', async ({ page }) => {
-    // Enable interactive mode
-    await page.check('#interactiveMode');
+    await enableInteractiveAndGenerate(page);
+    const pos = await getPlayerScreenPos(page, 'any');
 
-    // Generate lineup
-    await page.click('button:has-text("Generate Lineup")');
-    await waitForLineupRendered(page);
+    const initialSnapshot = await page.locator('canvas').screenshot();
 
-    // Get initial canvas rendering
-    const initialCanvas = await page.locator('canvas').screenshot();
-
-    const canvas = page.locator('canvas');
-    const box = await canvas.boundingBox();
-    if (!box) throw new Error('Canvas not found');
-
-    const initialX = box.x + box.width * 0.2;
-    const initialY = box.y + box.height * 0.5;
-
-    // Start drag
-    await page.mouse.move(initialX, initialY);
+    await page.mouse.move(pos.x, pos.y);
     await page.mouse.down();
+    await page.mouse.move(pos.x + 60, pos.y + 60, { steps: 10 });
 
-    // Move to intermediate position
-    const midX = box.x + box.width * 0.3;
-    const midY = box.y + box.height * 0.6;
-    await page.mouse.move(midX, midY);
-
-    // Canvas should have changed during drag
-    const midCanvas = await page.locator('canvas').screenshot();
-    expect(initialCanvas).not.toEqual(midCanvas);
+    const midSnapshot = await page.locator('canvas').screenshot();
+    expect(initialSnapshot).not.toEqual(midSnapshot);
 
     await page.mouse.up();
   });

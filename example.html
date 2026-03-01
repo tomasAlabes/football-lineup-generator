@@ -561,6 +561,7 @@
 
                 // Initialize renderer
                 currentRenderer = new FootballLineupRenderer(canvas, config);
+                window.currentRenderer = currentRenderer;
 
                 // Render the lineup
                 currentRenderer.render(lineupData);
