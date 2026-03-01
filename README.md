@@ -9,9 +9,6 @@
 
 A TypeScript library for generating visual football (soccer) lineup diagrams from team positioning data. Create beautiful, interactive lineup visualizations that can be easily embedded in web applications.
 
-## Live Demo
-
-🚀 **[Try the live demo here](https://ncamaa.github.io/football-lineup-generator/)**
 
 ## Features
 
@@ -23,6 +20,30 @@ A TypeScript library for generating visual football (soccer) lineup diagrams fro
 - ⚡ Lightweight with no external dependencies
 - 🏆 Support for substitutes and bench players
 - 🎮 **Interactive mode** - Drag and drop players to customize formations
+
+## This Fork
+
+This is a fork of [ncamaa/football-lineup-generator](https://github.com/ncamaa/football-lineup-generator) with significant feature additions and bug fixes not present in the upstream library:
+
+| Feature | Upstream | This fork |
+|---------|:--------:|:---------:|
+| Basic lineup rendering | ✅ | ✅ |
+| Substitute players (bench rendering) | ❌ | ✅ |
+| Interactive drag-and-drop players | partial | ✅ fixed |
+| Draggable ball on the field | ❌ | ✅ |
+| Canvas recording (WebM export) | ❌ | ✅ |
+| Built-in recording UI controls | ❌ | ✅ |
+| Programmatic position read/write APIs | ❌ | ✅ |
+| Playwright test suite | ❌ | ✅ |
+
+**New features in detail:**
+
+- **Substitutes** (`showSubstitutes`): Renders bench players off-field with configurable positioning (left/bottom/right).
+- **Interactive mode** (`interactive: true`): Drag-and-drop players across all three layout types (full/half/split pitch). The upstream had broken coordinate handling for non-full-pitch layouts — fixed here.
+- **Ball** (`ball: true`): A draggable ball rendered on the field with `onBallMove` callback and programmatic `getBallPosition()` / `setBallPosition()` APIs.
+- **Recording** (`recording: true`): Record canvas animations to WebM via MediaRecorder. Start, pause, resume, stop, and download from code or via the optional built-in overlay UI (`recordingUI: true`).
+- **Programmatic APIs**: `getAllPlayerPositions()` returns every player's current canvas coordinates (including drag overrides); `getCustomCoordinates()`, `setCustomCoordinate()`, and `clearCustomCoordinates()` allow saving and restoring custom formations.
+- **Test suite**: Playwright tests covering rendering, interactive mode, ball behaviour, and the full public API surface.
 
 ## Screenshots
 

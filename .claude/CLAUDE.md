@@ -32,7 +32,15 @@ npm run serve
 
 **Development workflow**: Run `npm run dev` to start TypeScript watch mode and HTTP server simultaneously. Open http://localhost:3000 to view `example.html` which loads the compiled library from `dist/index.js`. Changes to `src/` files are automatically compiled.
 
-**No tests configured**: The project currently has no test suite (`npm test` exits with error).
+**Running tests**: `npm test` runs the Playwright suite against `http://localhost:3000`. The dist must be built first — Playwright's web server serves `dist/index.js` via `http-server`. Run `npm run build && npm test` for a clean run. In CI, `reuseExistingServer` is disabled so the server starts fresh.
+
+```bash
+# Run tests (build first if dist is stale)
+npm run build && npm test
+
+# Or if the server is already running on :3000
+npm test
+```
 
 ## Architecture
 
@@ -50,6 +58,20 @@ npm run serve
 - Constructor accepts HTMLCanvasElement and LineupConfig
 - `render(lineupData)` method orchestrates the rendering by calling layout-specific functions
 - Handles canvas sizing (adjusts dimensions for SPLIT_PITCH layout which uses rotated view)
+
+**InteractiveController (src/interactiveController.ts)**
+- Manages drag-and-drop for players and ball when `interactive: true`
+- Stores custom player coordinates in `CustomCoordinatesMap`; populates `playerCoordinates` (used by `getAllPlayerPositions()`) after every render
+- Attaches/detaches mouse and touch event listeners; call `destroy()` to clean up
+
+**RecordingController (src/recordingController.ts)**
+- Wraps the browser `MediaRecorder` API for canvas capture
+- Exposes `start()`, `pause()`, `resume()`, `stop()`, `getBlob()`, `download()`
+- State machine: `idle → recording → paused → stopped`
+
+**RecordingUI (src/recordingUI.ts)**
+- Renders an overlay button bar over the canvas for recording controls when `recordingUI: true`
+- Positioned relative to the canvas element (not the viewport)
 
 **Layout System (src/functions/render*.ts)**
 Three distinct rendering strategies:
@@ -127,18 +149,28 @@ TypeScript compiles to ES2020 with ESM modules. The `.js` extension is included 
 
 ```
 src/
-├── types.ts              # Type definitions and enums
-├── index.ts              # Main entry point and exports
-├── renderer.ts           # FootballLineupRenderer class
+├── types.ts                  # Type definitions and enums
+├── index.ts                  # Main entry point and exports
+├── renderer.ts               # FootballLineupRenderer class
+├── interactiveController.ts  # Drag-and-drop for players + ball
+├── recordingController.ts    # MediaRecorder wrapper (WebM export)
+├── recordingUI.ts            # Built-in overlay recording controls
 └── functions/
-    ├── index.ts          # Re-exports all functions
-    ├── render*.ts        # Layout-specific rendering (Full/Half/Split)
-    ├── getPositionCoordinates.ts    # Position-to-coordinate mapping
-    ├── calculate*.ts     # Coordinate calculations and transformations
-    ├── draw*.ts          # Canvas drawing primitives
-    └── mirror/rotate/getHalfPitch   # Coordinate transformations
+    ├── index.ts              # Re-exports all functions
+    ├── render*.ts            # Layout-specific rendering (Full/Half/Split)
+    ├── getPositionCoordinates.ts  # Position-to-coordinate mapping
+    ├── calculate*.ts         # Coordinate calculations and transformations
+    ├── draw*.ts              # Canvas drawing primitives (incl. drawBall.ts)
+    └── mirror/rotate/getHalfPitch  # Coordinate transformations
 ```
 
-## GitHub Pages Demo
+**Test files (`tests/`)**
+- `rendering.spec.ts` — canvas output and layout smoke tests
+- `interactive.spec.ts` — drag-and-drop player interaction
+- `ball.spec.ts` — ball rendering and drag behaviour
+- `api.spec.ts` — public API surface (`getAllPlayerPositions`, `setCustomCoordinate`, etc.)
+- `helpers.ts` — shared test utilities
 
-The repository includes `index.html` and `example.html` which are served via GitHub Pages at https://ncamaa.github.io/football-lineup-generator/. The static site workflow is configured in `.github/workflows/static.yml`.
+## GitHub Pages
+
+The repository deploys `index.html` and `example.html` to GitHub Pages via `.github/workflows/static.yml` on every push to `master`. The workflow runs `npm ci && npm run build` before uploading. No live demo link is maintained in the README because the `tomasAlabes` GitHub account uses a custom domain (`tomasalabes.me`), causing all Pages URLs to redirect there.
