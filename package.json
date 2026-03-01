@@ -1,6 +1,6 @@
 {
   "name": "@talabes/football-lineup-generator",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "A TypeScript library for generating visual football lineup diagrams from team positioning data. Fork of ncamaa/football-lineup-generator with bug fixes and improvements.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
