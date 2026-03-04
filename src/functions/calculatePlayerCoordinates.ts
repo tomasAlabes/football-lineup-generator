@@ -96,7 +96,7 @@ function getFullPitchBaseCoords(
     [Position.RIGHT_BACK]: { x: fieldMargin + fieldWidth * 0.27, y: height * 0.8 },
     [Position.DEFENSIVE_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.45, y: height / 2 },
     [Position.LEFT_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.6, y: height * 0.2 },
-    [Position.CENTER_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.55, y: height / 2 },
+    [Position.CENTER_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.65, y: height / 2 },
     [Position.RIGHT_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.6, y: height * 0.8 },
     [Position.ATTACKING_MIDFIELDER]: { x: fieldMargin + fieldWidth * 0.67, y: height / 2 },
     [Position.LEFT_WINGER]: { x: fieldMargin + fieldWidth * 0.75, y: height * 0.2 },
@@ -125,21 +125,24 @@ function getHalfPitchBaseCoords(
   const halfWidth = fieldWidth / 2;
   const baseX = isHomeTeam ? fieldMargin : fieldMargin + halfWidth;
 
+  // For away team, mirror X fractions so GK is near their goal (right edge)
+  const xf = (fraction: number) => baseX + halfWidth * (isHomeTeam ? fraction : 1 - fraction);
+
   const baseCoords: Record<Position, FieldCoordinates> = {
-    [Position.GOALKEEPER]: { x: baseX + halfWidth * 0.15, y: height / 2 },
-    [Position.LEFT_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.15 },
-    [Position.CENTER_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.5 },
-    [Position.RIGHT_BACK]: { x: baseX + halfWidth * 0.4, y: height * 0.85 },
-    [Position.DEFENSIVE_MIDFIELDER]: { x: baseX + halfWidth * 0.6, y: height * 0.35 },
-    [Position.LEFT_MIDFIELDER]: { x: baseX + halfWidth * 0.75, y: height * 0.2 },
-    [Position.CENTER_MIDFIELDER]: { x: baseX + halfWidth * 0.6, y: height * 0.65 },
-    [Position.RIGHT_MIDFIELDER]: { x: baseX + halfWidth * 0.75, y: height * 0.8 },
-    [Position.ATTACKING_MIDFIELDER]: { x: baseX + halfWidth * 0.85, y: height * 0.5 },
-    [Position.LEFT_WINGER]: { x: baseX + halfWidth * 0.9, y: height * 0.15 },
-    [Position.RIGHT_WINGER]: { x: baseX + halfWidth * 0.9, y: height * 0.85 },
-    [Position.LEFT_FORWARD]: { x: baseX + halfWidth * 0.95, y: height * 0.35 },
-    [Position.CENTER_FORWARD]: { x: baseX + halfWidth * 0.95, y: height * 0.5 },
-    [Position.RIGHT_FORWARD]: { x: baseX + halfWidth * 0.95, y: height * 0.65 },
+    [Position.GOALKEEPER]: { x: xf(0.15), y: height / 2 },
+    [Position.LEFT_BACK]: { x: xf(0.45), y: height * 0.15 },
+    [Position.CENTER_BACK]: { x: xf(0.4), y: height * 0.5 },
+    [Position.RIGHT_BACK]: { x: xf(0.45), y: height * 0.85 },
+    [Position.DEFENSIVE_MIDFIELDER]: { x: xf(0.55), y: height * 0.5 },
+    [Position.LEFT_MIDFIELDER]: { x: xf(0.75), y: height * 0.2 },
+    [Position.CENTER_MIDFIELDER]: { x: xf(0.68), y: height * 0.5 },
+    [Position.RIGHT_MIDFIELDER]: { x: xf(0.75), y: height * 0.8 },
+    [Position.ATTACKING_MIDFIELDER]: { x: xf(0.85), y: height * 0.5 },
+    [Position.LEFT_WINGER]: { x: xf(0.9), y: height * 0.15 },
+    [Position.RIGHT_WINGER]: { x: xf(0.9), y: height * 0.85 },
+    [Position.LEFT_FORWARD]: { x: xf(0.95), y: height * 0.35 },
+    [Position.CENTER_FORWARD]: { x: xf(0.95), y: height * 0.5 },
+    [Position.RIGHT_FORWARD]: { x: xf(0.95), y: height * 0.65 },
     [Position.SUBSTITUTE]: { x: width + 20, y: height / 2 },
   };
 
@@ -163,14 +166,18 @@ function calculatePositionOffset(
   if (totalPlayers === 2) {
     // For 2 players, place them with larger separation
     const offset = playerIndex === 0 ? -offsetDistance/1.5 : offsetDistance/1.5;
-    
-    // Layout-aware offset direction
+
     if (layoutType === LayoutType.SPLIT_PITCH) {
-      // For split pitch, prefer horizontal offset to avoid field edge issues
+      // Split pitch rotates 90° CCW: (x,y) → (y, width-x)
+      // Pre-rotation Y-offset becomes post-rotation X-offset (perpendicular to goal)
+      // Pre-rotation X-offset becomes post-rotation Y-offset
+      if (isVerticalPosition(position)) {
+        return { x: baseCoords.x, y: baseCoords.y + offset };
+      }
       return { x: baseCoords.x + offset, y: baseCoords.y };
     }
-    
-    // Determine offset direction based on position for other layouts
+
+    // FULL_PITCH / HALF_PITCH: Y-axis is perpendicular to goal line
     if (isVerticalPosition(position)) {
       return { x: baseCoords.x, y: baseCoords.y + offset };
     }
@@ -178,32 +185,57 @@ function calculatePositionOffset(
   }
   
   if (totalPlayers === 3) {
-    // For 3 players, create a wider triangle formation
-    const triangleOffsets = [
-      { x: 0, y: 0 },           // Left vertex (original position)
-      { x: offsetDistance / 3, y: -offsetDistance * 2 }, // Right top vertex
-      { x: offsetDistance / 3, y: offsetDistance * 2 }   // Right bottom vertex
+    // Triangle: 1 player deeper, 2 spread perpendicular to goal line
+    // Defenders use tighter spacing, midfielders/forwards use wider
+    const isDefender = [Position.CENTER_BACK, Position.LEFT_BACK, Position.RIGHT_BACK].includes(position);
+    const isMidfielder = [Position.CENTER_MIDFIELDER, Position.DEFENSIVE_MIDFIELDER, Position.ATTACKING_MIDFIELDER].includes(position);
+    const spreadMultiplier = isDefender ? 1.5 : isMidfielder ? 2.5 : 2;
+
+    // depth = along goal-to-goal axis, spread = perpendicular to it
+    const depthOffset = (isMidfielder ? offsetDistance * 1.2 : offsetDistance / 3);
+    const spreadOffset = offsetDistance * spreadMultiplier;
+
+    // Offsets in (depth, spread) space: one deep, two wide
+    const logicalOffsets = [
+      { depth: 0, spread: 0 },
+      { depth: depthOffset, spread: -spreadOffset },
+      { depth: depthOffset, spread: spreadOffset }
     ];
-    
+
+    const lo = logicalOffsets[playerIndex];
+
+    if (layoutType === LayoutType.SPLIT_PITCH) {
+      // Pre-rotation: X = depth (goal-to-goal), Y = spread (perpendicular)
+      // After 90° CCW rotation these swap correctly
+      return {
+        x: baseCoords.x + lo.depth,
+        y: baseCoords.y + lo.spread
+      };
+    }
+
+    // FULL_PITCH / HALF_PITCH: X = depth (goal-to-goal), Y = spread (perpendicular)
     return {
-      x: baseCoords.x + triangleOffsets[playerIndex].x,
-      y: baseCoords.y + triangleOffsets[playerIndex].y
+      x: baseCoords.x + lo.depth,
+      y: baseCoords.y + lo.spread
     };
   }
   
   // For more than 3 players, create a wider grid
+  // cols = along perpendicular axis (spread), rows = along depth axis
   const cols = Math.ceil(Math.sqrt(totalPlayers));
   const rows = Math.ceil(totalPlayers / cols);
-  
+
   const col = playerIndex % cols;
   const row = Math.floor(playerIndex / cols);
-  
-  const xOffset = (col - (cols - 1) / 2) * (offsetDistance / 1.2); // Wider spacing
-  const yOffset = (row - (rows - 1) / 2) * (offsetDistance / 1.2);
-  
+
+  const depthOffset = (row - (rows - 1) / 2) * (offsetDistance / 1.2);
+  const spreadOffset = (col - (cols - 1) / 2) * (offsetDistance / 1.2);
+
+  // For all layouts: X = depth (goal-to-goal), Y = spread (perpendicular)
+  // Split pitch rotation handles the final mapping
   return {
-    x: baseCoords.x + xOffset,
-    y: baseCoords.y + yOffset
+    x: baseCoords.x + depthOffset,
+    y: baseCoords.y + spreadOffset
   };
 }
 
