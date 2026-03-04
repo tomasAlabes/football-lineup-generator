@@ -107,6 +107,12 @@ export class FootballLineupRenderer {
       onBallMove: config.onBallMove,
     };
 
+    // Scale player circle and font sizes proportionally for smaller canvases
+    const BASE_WIDTH = 800;
+    const scaleFactor = Math.min(this.config.width / BASE_WIDTH, 1);
+    this.config.playerCircleSize = Math.max(Math.round(this.config.playerCircleSize * scaleFactor), 10);
+    this.config.fontSize = Math.max(Math.round(this.config.fontSize * scaleFactor), 8);
+
     // Adjust canvas size for split pitch layout
     if (this.config.layoutType === LayoutType.SPLIT_PITCH) {
       // For rotated split pitch: arrange side by side with rotated dimensions
