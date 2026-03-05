@@ -16,6 +16,23 @@ const MINIMAL_LINEUP = {
   },
 };
 
+const LINEUP_WITH_SUBS = {
+  homeTeam: {
+    name: 'Home',
+    players: [
+      { player: { id: 1, name: 'Player One', jerseyNumber: 7 }, team: 'red', position: 'goalkeeper' },
+      { player: { id: 3, name: 'Sub One', jerseyNumber: 12 }, team: 'red', position: 'substitute' },
+    ],
+  },
+  awayTeam: {
+    name: 'Away',
+    players: [
+      { player: { id: 2, name: 'Player Two', jerseyNumber: 9 }, team: 'yellow', position: 'goalkeeper' },
+      { player: { id: 4, name: 'Sub Two', jerseyNumber: 14 }, team: 'yellow', position: 'substitute' },
+    ],
+  },
+};
+
 /**
  * Creates a renderer in the browser via dynamic import, renders a minimal lineup,
  * and captures all font size values set on the canvas context during rendering.
@@ -60,6 +77,46 @@ async function renderToDataURL(page: any, width: number, height: number): Promis
     renderer.render(args.lineup);
     return canvas.toDataURL();
   }, { width, height, lineup: MINIMAL_LINEUP });
+}
+
+/**
+ * Renders a lineup with substitutes and captures font sizes and arc radii used.
+ */
+async function getRenderedSubMetrics(page: any, width: number): Promise<{ fontSizes: number[]; arcRadii: number[] }> {
+  return page.evaluate(async (args: { width: number; lineup: any }) => {
+    const { FootballLineupRenderer } = await import('./dist/index.js');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+
+    const fontSizes: number[] = [];
+    const arcRadii: number[] = [];
+
+    // Spy on ctx.font
+    const fontDesc = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, 'font');
+    Object.defineProperty(ctx, 'font', {
+      set(value: string) {
+        const match = value.match(/(\d+)px/);
+        if (match) fontSizes.push(parseInt(match[1]));
+        fontDesc!.set!.call(this, value);
+      },
+      get() { return fontDesc!.get!.call(this); },
+    });
+
+    // Spy on ctx.arc to capture radii
+    const originalArc = ctx.arc.bind(ctx);
+    ctx.arc = function(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise?: boolean) {
+      arcRadii.push(radius);
+      return originalArc(x, y, radius, startAngle, endAngle, counterclockwise);
+    };
+
+    const renderer = new FootballLineupRenderer(canvas, {
+      width: args.width,
+      height: 600,
+      showSubstitutes: { enabled: true, position: 'bottom' },
+    });
+    renderer.render(args.lineup);
+    return { fontSizes, arcRadii };
+  }, { width, lineup: LINEUP_WITH_SUBS });
 }
 
 test.describe('Responsive scaling', () => {
@@ -111,5 +168,28 @@ test.describe('Responsive scaling', () => {
     const wide = await renderToDataURL(page, 800, 600);
     const narrow = await renderToDataURL(page, 400, 300);
     expect(wide).not.toEqual(narrow);
+  });
+
+  test('substitute font sizes scale down at half width', async ({ page }) => {
+    const full = await getRenderedSubMetrics(page, 800);
+    const half = await getRenderedSubMetrics(page, 400);
+
+    const maxFontFull = Math.max(...full.fontSizes);
+    const maxFontHalf = Math.max(...half.fontSizes);
+    expect(maxFontHalf).toBeLessThan(maxFontFull);
+  });
+
+  test('substitute circle radii scale down at half width', async ({ page }) => {
+    const full = await getRenderedSubMetrics(page, 800);
+    const half = await getRenderedSubMetrics(page, 400);
+
+    // Default playerCircleSize=16. At 800px (scale=1) → 16. At 400px (scale=0.5) → max(round(8),10)=10.
+    // Filter out field-drawing arcs (center circle=50, corner arcs, etc.) by looking for the player circle sizes.
+    const fullPlayerRadii = full.arcRadii.filter(r => r <= 20);
+    const halfPlayerRadii = half.arcRadii.filter(r => r <= 20);
+
+    const maxPlayerFull = Math.max(...fullPlayerRadii);
+    const maxPlayerHalf = Math.max(...halfPlayerRadii);
+    expect(maxPlayerHalf).toBeLessThan(maxPlayerFull);
   });
 });

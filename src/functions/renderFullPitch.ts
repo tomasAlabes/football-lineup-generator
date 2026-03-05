@@ -170,7 +170,8 @@ export function renderFullPitch(
       config.homeTeamColor,
       config.awayTeamColor,
       config.fontSize,
-      config.showSubstitutes.position
+      config.showSubstitutes.position,
+      config.playerCircleSize
     );
   }
 

@@ -9,9 +9,10 @@ export function drawSubstitutesList(
   homeTeamColor: string,
   awayTeamColor: string,
   fontSize: number,
-  position: SubstitutesPosition
+  position: SubstitutesPosition,
+  playerCircleSize: number = 15
 ): void {
-  const circleRadius = 15;
+  const circleRadius = playerCircleSize;
   const spacing = 12; // Space between circle and text
 
   // Get substitutes
