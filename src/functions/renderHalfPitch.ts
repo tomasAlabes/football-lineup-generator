@@ -162,7 +162,8 @@ export function renderHalfPitch(
       config.awayTeamColor,
       config.fontSize,
       config.showSubstitutes.position,
-      config.playerCircleSize
+      config.playerCircleSize,
+      config.showSubstitutes.fontColor ?? '#333333'
     );
   }
 

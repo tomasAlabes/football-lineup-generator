@@ -62,6 +62,7 @@ export interface LineupData {
 export interface SubstitutesConfig {
   enabled: boolean;
   position: SubstitutesPosition;
+  fontColor?: string;
 }
 
 export interface RecordingOptions {
